@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Valider — Réseaux informatiques</title>
+<style>
+:root{--bg:#f5f6f7;--surface:#fff;--ink:#20252b;--muted:#727a84;--line:#e4e7eb;--accent:#557b68;--accent-soft:#edf3ef;--terminal:#171b1f;--terminal-ink:#e6e9e7;--terminal-muted:#9aa39e;--shadow:0 8px 28px rgba(25,32,38,.045)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input{font:inherit}button{cursor:pointer}
+.topbar{height:62px;background:rgba(255,255,255,.92);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,48px);position:sticky;top:0;z-index:2}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.03em;font-size:17px}.brandmark{height:29px;width:29px;border-radius:8px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:12px;letter-spacing:0}.crumb{color:var(--muted);font-size:13px}.topright{display:flex;align-items:center;gap:10px}.pill{border:1px solid var(--line);border-radius:999px;padding:5px 10px;color:var(--muted);font-size:12px;background:#fff}
+main{max-width:1240px;margin:0 auto;padding:34px 22px 50px}.eyebrow{font-size:11px;font-weight:750;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);margin-bottom:9px}.intro{display:flex;justify-content:space-between;gap:22px;align-items:flex-end;margin-bottom:25px}.intro h1{font-size:clamp(26px,3vw,36px);letter-spacing:-.045em;line-height:1.12;margin:0 0 10px;font-weight:750}.intro p{color:var(--muted);max-width:610px;margin:0;font-size:14px}.intro-note{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 15px;min-width:185px}.intro-note strong{display:block;font-size:13px;margin-bottom:2px}.intro-note span{font-size:12px;color:var(--muted)}
+.workspace{display:grid;grid-template-columns:230px minmax(0,1fr);gap:18px;align-items:start}.panel{background:var(--surface);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);overflow:hidden}.sidehead{padding:17px 17px 12px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:750}.device-list{padding:0 9px 12px;display:grid;gap:4px}.device{border:1px solid transparent;background:transparent;border-radius:10px;width:100%;padding:11px 10px;display:flex;align-items:center;gap:11px;text-align:left;color:var(--ink)}.device:hover{background:#f8f9f9}.device.active{background:var(--accent-soft);border-color:#dce8e0}.device-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:9px;border:1px solid var(--line);background:#fff;color:#53605a;flex:none}.device.active .device-icon{border-color:#d5e2d9;color:var(--accent)}.device-name{font-size:13px;font-weight:650;display:block}.device-desc{font-size:11px;color:var(--muted);display:block;margin-top:1px}.sidefoot{border-top:1px solid var(--line);padding:14px 16px;color:var(--muted);font-size:12px}
+.mainpanel{min-width:0}.panelhead{padding:16px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}.panelhead h2{font-size:14px;margin:0;font-weight:700}.panelhead p{font-size:12px;color:var(--muted);margin:3px 0 0}.status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;white-space:nowrap}.dot{width:7px;height:7px;border-radius:50%;background:#7c9b88}
+.terminal{background:var(--terminal);color:var(--terminal-ink);margin:16px;border-radius:11px;overflow:hidden}.termbar{height:40px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2c3237;color:#aeb7b1;font-size:11px}.termleft{display:flex;align-items:center;gap:8px}.termicon{height:22px;width:22px;border-radius:6px;background:#2b3330;color:#b4d0bf;display:grid;place-items:center;font-size:12px}.term-actions{display:flex;gap:7px}.quiet-btn{border:1px solid #394047;background:transparent;color:#c1c8c4;border-radius:6px;padding:4px 8px;font-size:11px}.quiet-btn:hover{background:#2a3035}.output{height:310px;overflow:auto;padding:17px 18px 8px;font:12.5px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}.line{min-height:1.4em}.prompt{color:#a7cbb5}.error{color:#e2a7a7}.dim{color:var(--terminal-muted)}.inputrow{display:flex;align-items:center;gap:9px;padding:10px 15px 13px;border-top:1px solid #2c3237}.promptlabel{font:12px ui-monospace,monospace;color:#a7cbb5;white-space:nowrap}.command-input{min-width:0;flex:1;background:transparent;border:0;outline:0;color:#fff;font:12.5px ui-monospace,monospace;padding:6px 0}.command-input::placeholder{color:#77817b}.send{background:#e9efeb;color:#293b31;border:0;border-radius:7px;padding:8px 12px;font-size:12px;font-weight:700}.send:hover{background:#d9e5dd}
+.below{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 16px 16px}.subpanel{border:1px solid var(--line);border-radius:10px;padding:13px 14px;min-width:0}.subhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}.subhead strong{font-size:12px}.subhead span{font-size:11px;color:var(--muted)}.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{background:#f6f7f7;border:1px solid #e7e9e9;border-radius:6px;padding:5px 7px;font:11px ui-monospace,monospace;color:#49534d}.chip:hover{background:var(--accent-soft);border-color:#d7e3da}.helptext{font-size:12px;color:var(--muted);margin:0}
+.lesson{margin-top:18px;padding:17px 19px;display:flex;gap:15px;align-items:flex-start}.lesson-icon{width:34px;height:34px;flex:none;border-radius:9px;background:#f0f2f1;display:grid;place-items:center;color:#53605a}.lesson h3{font-size:13px;margin:0 0 4px}.lesson p{font-size:12px;color:var(--muted);margin:0;max-width:780px}
+.footer{display:flex;justify-content:space-between;gap:10px;margin-top:25px;color:#899098;font-size:11px}
+@media(max-width:760px){main{padding:24px 13px}.intro{align-items:flex-start;flex-direction:column}.intro-note{width:100%}.workspace{grid-template-columns:1fr}.device-list{grid-template-columns:repeat(2,minmax(0,1fr))}.sidehead{padding-bottom:8px}.sidefoot{display:none}.output{height:280px}.below{grid-template-columns:1fr}.crumb{display:none}.topbar{padding:0 14px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="brandmark">V.</span><span>valider</span><span class="crumb">/ Réseaux informatiques</span></div>
+  <div class="topright"><span class="pill">Atelier pratique</span><span class="pill">Version démo</span></div>
+</header>
+<main>
+  <section class="intro">
+    <div><div class="eyebrow">Laboratoire interactif</div><h1>Terminal réseau</h1><p>Entraîne-toi aux commandes Cisco et aux configurations réseau dans un environnement clair, sans quitter ton navigateur.</p></div>
+    <div class="intro-note"><strong>Environnement pédagogique</strong><span>Commandes simulées · Aucun équipement requis</span></div>
+  </section>
+  <div class="workspace">
+    <aside class="panel">
+      <div class="sidehead">Équipements</div>
+      <div class="device-list">
+        <button class="device active" data-device="Switch"><span class="device-icon">⇄</span><span><span class="device-name">Switch</span><span class="device-desc">Commutation · VLAN</span></span></button>
+        <button class="device" data-device="Routeur"><span class="device-icon">⌘</span><span><span class="device-name">Routeur</span><span class="device-desc">IP · Routage</span></span></button>
+        <button class="device" data-device="PC"><span class="device-icon">▣</span><span><span class="device-name">PC</span><span class="device-desc">IP · Connectivité</span></span></button>
+        <button class="device" data-device="Serveur"><span class="device-icon">▤</span><span><span class="device-name">Serveur</span><span class="device-desc">IP · Services réseau</span></span></button>
+      </div>
+      <div class="sidefoot">Choisis un équipement pour ouvrir son terminal et ses commandes.</div>
+    </aside>
+    <section class="panel mainpanel">
+      <div class="panelhead"><div><h2 id="equip-title">Switch · CLI</h2><p id="equip-desc">Interface en ligne de commande Cisco IOS</p></div><div class="status"><span class="dot"></span>Simulation active</div></div>
+      <div class="terminal">
+        <div class="termbar"><div class="termleft"><span class="termicon">›_</span><span id="term-title">SWITCH-1 / CONSOLE</span></div><div class="term-actions"><button class="quiet-btn" id="clear">Effacer</button><button class="quiet-btn" id="reset">Réinitialiser</button></div></div>
+        <div class="output" id="output" aria-live="polite"></div>
+        <form class="inputrow" id="command-form"><span class="promptlabel" id="prompt">Switch&gt;</span><input class="command-input" id="command" autocomplete="off" spellcheck="false" placeholder="Saisir une commande…" aria-label="Commande réseau"><button class="send" type="submit">Exécuter ↵</button></form>
+      </div>
+      <div class="below">
+        <div class="subpanel"><div class="subhead"><strong>Commandes rapides</strong><span>Cliquer pour insérer</span></div><div class="chips" id="chips"></div></div>
+        <div class="subpanel"><div class="subhead"><strong>Aide de syntaxe</strong><span>Raccourcis</span></div><p class="helptext">↑ / ↓ : historique des commandes<br>Ctrl + L : nettoyer le terminal<br>Ctrl + C : interrompre la saisie</p></div>
+      </div>
+    </section>
+  </div>
+  <section class="panel lesson"><span class="lesson-icon">i</span><div><h3>À propos de cette simulation</h3><p>Cette première maquette reproduit une partie des commandes usuelles. Les commandes reconnues modifient l'état simulé de l'équipement. Elle ne remplace pas Cisco Packet Tracer et ne configure aucun appareil réel.</p></div></section>
+  <div class="footer"><span>Valider · Réseaux informatiques</span><span>Apprendre · Configurer · Vérifier</span></div>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const output=$('#output'),input=$('#command'),prompt=$('#prompt'),chips=$('#chips');
+let device='Switch',mode='user',history=[],historyIndex=0,hostname='Switch',interfaces={},vlans=[{id:1,name:'default'}],ip='unassigned',mask='unassigned',gateway='unassigned',dns='unassigned',services={DHCP:false,DNS:false,HTTP:false,FTP:false},running=false;
+const quick={
+ Switch:['enable','show vlan brief','show interfaces','configure terminal','vlan 10','show running-config'],
+ Routeur:['enable','show ip interface brief','show ip route','configure terminal','interface g0/0','no shutdown'],
+ PC:['ipconfig','ipconfig /all','ping 192.168.1.1','tracert 192.168.1.1'],
+ Serveur:['ipconfig','ping 192.168.1.1','show services','help']
+};
+function write(text='',cls=''){const d=document.createElement('div');d.className='line '+cls;d.textContent=text;output.appendChild(d);output.scrollTop=output.scrollHeight}
+function promptText(){if(device==='PC')return 'C:\\>';if(device==='Serveur')return 'Server>';return hostname+(mode==='config'?'(config)':mode==='interface'?'(config-if)':mode==='vlan'?'(config-vlan)':'')+(mode==='user'?'>':'#')}
+function refreshPrompt(){prompt.textContent=promptText()}
+function banner(){write('Valider Network Lab — terminal pédagogique','dim');write('Équipement : '+device+' | Tapez help pour les commandes disponibles.','dim');write('');refreshPrompt()}
+function renderChips(){chips.innerHTML='';quick[device].forEach(c=>{const b=document.createElement('button');b.className='chip';b.textContent=c;b.type='button';b.onclick=()=>{input.value=c;input.focus()};chips.appendChild(b)})}
+function setDevice(d){device=d;mode='user';hostname=d==='Switch'?'Switch':d==='Routeur'?'Router':d==='PC'?'PC-1':'Server-1';interfaces={};vlans=[{id:1,name:'default'}];ip='unassigned';mask='unassigned';gateway='unassigned';dns='unassigned';services={DHCP:false,DNS:false,HTTP:false,FTP:false};running=false;document.querySelectorAll('.device').forEach(b=>b.classList.toggle('active',b.dataset.device===d));$('#equip-title').textContent=d+' · '+(d==='PC'?'Terminal':d==='Serveur'?'Configuration réseau':'CLI');$('#equip-desc').textContent=d==='Switch'||d==='Routeur'?'Interface en ligne de commande Cisco IOS':d==='PC'?'Terminal du poste client':'Paramètres réseau et services';$('#term-title').textContent=hostname.toUpperCase()+' / CONSOLE';output.innerHTML='';banner();renderChips();input.value='';input.focus()}
+document.querySelectorAll('.device').forEach(b=>b.addEventListener('click',()=>setDevice(b.dataset.device)));
+function help(){if(device==='PC')return ['Commandes disponibles :','ipconfig [ /all ]','ping <adresse IP>','tracert <adresse IP>','help'];if(device==='Serveur')return ['Commandes disponibles :','ipconfig','ping <adresse IP>','show services','service <DHCP|DNS|HTTP|FTP> on|off','help'];return ['Commandes IOS simulées :','enable | disable | configure terminal','hostname <nom>','interface <g0/0|fa0/1|...>','ip address <adresse> <masque>','no shutdown | shutdown','vlan <id> | name <nom>','ip default-gateway <adresse>','show vlan brief | show interfaces','show ip interface brief | show ip route','show running-config | copy running-config startup-config','exit | end | help']}
+function run(raw){const c=raw.trim(),l=c.toLowerCase();if(!c)return;write(promptText()+' '+c,'prompt');history.push(c);historyIndex=history.length;
+if(l==='help'||l==='?'){help().forEach(x=>write(x,'dim'));return}
+if(l==='clear'||l==='cls'){output.innerHTML='';return}
+if(l==='enable'&&device!=='PC'&&device!=='Serveur'){mode='priv';refreshPrompt();return}
+if(l==='disable'&&mode!=='user'){mode='user';refreshPrompt();return}
+if((l==='configure terminal'||l==='conf t')&&(device==='Switch'||device==='Routeur')&&mode==='priv'){mode='config';refreshPrompt();write('Entrez les commandes de configuration. Terminez avec end.','dim');return}
+if(l==='exit'){if(mode==='interface'||mode==='vlan')mode='config';else if(mode==='config')mode='priv';else if(mode==='priv')mode='user';refreshPrompt();return}
+if(l==='end'){mode=device==='Switch'||device==='Routeur'?'priv':'user';refreshPrompt();return}
+if(l.startsWith('hostname ')&&mode==='config'){hostname=c.slice(9).trim()||hostname;$('#term-title').textContent=hostname.toUpperCase()+' / CONSOLE';refreshPrompt();return}
+if(l.startsWith('interface ')&&mode==='config'){mode='interface';const name=c.slice(10).trim();interfaces[name]=interfaces[name]||{ip:'unassigned',mask:'unassigned',status:'administratively down'};write('Mode configuration interface : '+name,'dim');refreshPrompt();return}
+if(l.startsWith('vlan ')&&device==='Switch'&&mode==='config'){const id=Number(l.split(/\s+/)[1]);if(!Number.isInteger(id)||id<1||id>4094){write('% VLAN ID invalide.','error');return}if(!vlans.some(v=>v.id===id))vlans.push({id,name:'VLAN'+id});mode='vlan';refreshPrompt();return}
+if(l.startsWith('name ')&&mode==='vlan'){const v=vlans[vlans.length-1];v.name=c.slice(5).trim();refreshPrompt();return}
+if((l==='no shutdown'||l==='no shut')&&mode==='interface'){const key=Object.keys(interfaces).at(-1);interfaces[key].status='up';write('% Interface activée (simulation).','dim');return}
+if(l==='shutdown'&&mode==='interface'){const key=Object.keys(interfaces).at(-1);interfaces[key].status='administratively down';return}
+if(l.startsWith('ip address ')&&mode==='interface'){const a=c.split(/\s+/);if(a.length<4){write('% Usage: ip address <adresse> <masque>','error');return}const key=Object.keys(interfaces).at(-1);interfaces[key].ip=a[2];interfaces[key].mask=a[3];write('Adresse IP configurée (simulation).','dim');return}
+if(l.startsWith('ip default-gateway ')&&device==='Switch'&&mode==='config'){gateway=c.slice(19).trim();write('Passerelle de gestion configurée (simulation).','dim');return}
+if(l==='show vlan brief'&&device==='Switch'){write('VLAN  Name                             Status    Ports');write('----  -------------------------------- --------- ----------------');vlans.sort((a,b)=>a.id-b.id).forEach(v=>write(String(v.id).padEnd(6)+v.name.padEnd(33)+'active'));return}
+if(l==='show interfaces'||l==='show ip interface brief'){write('Interface        IP-Address      Status                    Protocol');const list=Object.entries(interfaces);if(!list.length){write('Aucune interface configurée dans cette session.','dim');return}list.forEach(([n,v])=>write(n.padEnd(17)+v.ip.padEnd(16)+v.status.padEnd(26)+(v.status==='up'?'up':'down')));return}
+if(l==='show ip route'&&device==='Routeur'){write('Codes: C - connected, S - static, L - local');const vals=Object.values(interfaces).filter(v=>v.ip!=='unassigned');if(!vals.length)write('Aucune route connectée. Configurez une interface.','dim');else vals.forEach(v=>write('C    '+v.ip+'/'+v.mask+'  is directly connected'));return}
+if(l==='show running-config'){write('Current configuration:');write('hostname '+hostname);Object.entries(interfaces).forEach(([n,v])=>{write('interface '+n);if(v.ip!=='unassigned')write(' ip address '+v.ip+' '+v.mask);write(v.status==='up'?' no shutdown':' shutdown')});if(device==='Switch')write('ip default-gateway '+gateway);return}
+if(l==='copy running-config startup-config'){write('Destination filename [startup-config]?');write('[OK] Configuration enregistrée dans la simulation.');return}
+if(device==='PC'||device==='Serveur'){
+if(l==='ipconfig'||l==='ipconfig /all'){write('Configuration réseau de '+hostname);write('   Adresse IPv4 . . . . . . . . : '+ip);write('   Masque de sous-réseau . . . : '+mask);write('   Passerelle par défaut . . . : '+gateway);if(l.endsWith('/all'))write('   Serveur DNS . . . . . . . . : '+dns);return}
+if(l.startsWith('ip address ')){const a=c.split(/\s+/);ip=a[2]||ip;mask=a[3]||mask;write('Adresse IP du terminal configurée (simulation).');return}
+if(l.startsWith('gateway ')){gateway=c.slice(8).trim();write('Passerelle configurée.');return}
+if(l.startsWith('dns ')){dns=c.slice(4).trim();write('DNS configuré.');return}
+if(l==='show services'&&device==='Serveur'){Object.entries(services).forEach(([k,v])=>write(k.padEnd(8)+' '+(v?'Activé':'Désactivé')));return}
+if(l.startsWith('service ')&&device==='Serveur'){const a=l.split(/\s+/);const key=Object.keys(services).find(k=>k.toLowerCase()===a[1]);if(!key||!['on','off'].includes(a[2])){write('% Usage: service <DHCP|DNS|HTTP|FTP> on|off','error');return}services[key]=a[2]==='on';write(key+' '+(services[key]?'activé':'désactivé')+' (simulation).');return}
+if(l.startsWith('ping ')){const target=c.slice(5).trim();write('Envoi de requêtes ICMP vers '+target+' …');write('Échec simulé : la topologie réseau et les hôtes distants ne sont pas encore reliés.','error');return}
+if(l.startsWith('tracert ')){write('Impossible de déterminer la route : topologie non simulée.','error');return}
+}
+if(l.startsWith('show ')){write('% Commande non disponible pour cet équipement ou ce mode.','error');return}
+if(device==='PC'||device==='Serveur'){write('Commande inconnue. Tapez help pour la liste des commandes.','error');return}
+if(mode==='user'){write('% Accès refusé : utilisez enable pour passer en mode privilégié.','error');return}
+write('% Invalid input detected. Vérifiez la syntaxe ou tapez help.','error')}
+$('#command-form').addEventListener('submit',e=>{e.preventDefault();const v=input.value;run(v);input.value='';refreshPrompt();input.focus()});
+$('#clear').addEventListener('click',()=>{output.innerHTML='';input.focus()});
+$('#reset').addEventListener('click',()=>setDevice(device));
+input.addEventListener('keydown',e=>{if(e.key==='ArrowUp'){e.preventDefault();if(historyIndex>0)historyIndex--;input.value=history[historyIndex]||''}if(e.key==='ArrowDown'){e.preventDefault();if(historyIndex<history.length-1)historyIndex++;else{historyIndex=history.length;input.value=''}input.value=history[historyIndex]||''}if(e.ctrlKey&&e.key.toLowerCase()==='l'){e.preventDefault();output.innerHTML=''}if(e.ctrlKey&&e.key.toLowerCase()==='c'){e.preventDefault();write('^C','dim');input.value=''}});
+setDevice('Switch');
+</script>
+</body></html>

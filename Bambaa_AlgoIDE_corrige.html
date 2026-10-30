@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Algorithme en pseudo code — SIMAC</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#121a2b;--line:#28354d;--text:#e8eefb;--muted:#9aa9c2;--accent:#7c9cff;--green:#74e0b1;--red:#ff8585}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,Segoe UI,Arial,sans-serif}
+header{padding:22px max(18px,calc((100vw - 1100px)/2));border-bottom:1px solid var(--line);background:#0e1527}
+h1{margin:0;font-size:25px}header p{margin:5px 0 0;color:var(--muted)}
+main{max-width:1100px;margin:22px auto;padding:0 16px;display:grid;grid-template-columns:1fr;gap:16px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
+.panel-head{padding:12px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.panel-head strong{font-size:14px}.actions{display:flex;gap:8px;flex-wrap:wrap}
+button{border:0;border-radius:8px;padding:9px 13px;background:var(--accent);color:#081020;font-weight:700;cursor:pointer}
+button.secondary{background:#26344c;color:var(--text)}button.stop{background:#ff8585;color:#260808}button:hover{filter:brightness(1.1)}button:disabled{opacity:.55;cursor:not-allowed}
+.editor-wrap{position:relative;height:420px;background:#0b1120}
+#lineNumbers{position:absolute;left:0;top:0;bottom:0;width:44px;margin:0;padding:16px 8px;color:#64748b;background:#0a0f1c;border-right:1px solid #202b40;text-align:right;overflow:hidden;white-space:pre;user-select:none;font:14px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace}
+#source,#highlight{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:16px 16px 16px 58px;border:0;outline:none;resize:vertical;overflow:auto;white-space:pre;tab-size:4;font:14px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace}
+#highlight{pointer-events:none;color:#e4edff;background:transparent}
+#source{background:transparent;color:transparent;caret-color:#fff;-webkit-text-fill-color:transparent;z-index:1}
+#source::selection{background:#4769a866;-webkit-text-fill-color:transparent}
+.kw{color:#c792ea;font-weight:700}.typ{color:#82aaff}.str{color:#c3e88d}.num{color:#f78c6c}.op{color:#89ddff}.comment{color:#718096;font-style:italic}
+#terminal{height:280px;overflow:auto;background:#070b14;padding:15px;font:14px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.terminal-input{display:inline-flex;align-items:baseline;gap:0;max-width:100%}.terminal-input input{width:12ch;max-width:65vw;background:transparent;border:0;outline:none;color:var(--text);padding:0;font:inherit;caret-color:var(--green)}.terminal-input input:disabled{opacity:1}.hint{color:var(--muted);font-size:12px;padding:10px 15px;border-top:1px solid var(--line)}
+.ok{color:var(--green)}.err{color:var(--red)}.muted{color:var(--muted)}
+details{max-width:1068px;margin:0 auto 24px;padding:0 16px;color:var(--muted)}summary{cursor:pointer;color:var(--text);font-weight:700}code{color:#c8d6ff}
+.syntax-panel{max-width:1100px;margin:0 auto 28px;padding:0 16px;color:var(--muted)}
+.syntax-panel>summary{padding:15px 18px;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--text);font-size:16px;list-style-position:inside}
+.syntax-panel[open]>summary{border-radius:12px 12px 0 0}
+.syntax-intro{padding:14px 18px;background:#10182a;border:1px solid var(--line);border-top:0}
+.syntax-intro p{margin:4px 0 10px}.syntax-note{font-size:13px;color:#9fb5df}
+.syntax-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:14px;background:#0e1525;border:1px solid var(--line);border-top:0}
+.syntax-card{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.syntax-card h3,.syntax-limitations h3{margin:0 0 8px;color:var(--text);font-size:14px}
+.syntax-card p{margin:7px 0;color:var(--muted);font-size:13px}
+.syntax-card pre{margin:10px 0 0;padding:12px;overflow:auto;background:#070b14;border:1px solid #202b40;border-radius:8px;color:#dce7ff;font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}
+.syntax-card pre code{color:inherit}
+.syntax-limitations{padding:16px 20px;background:#10182a;border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px}
+.syntax-limitations ul{padding-left:20px;margin:8px 0 0}.syntax-limitations li{margin:6px 0;font-size:13px}
+@media(max-width:760px){.syntax-grid{grid-template-columns:1fr;padding:10px}.syntax-card{padding:12px}.syntax-card pre{font-size:11px}.syntax-panel{padding:0 10px}}
+@media(max-width:760px){.editor-wrap{height:340px}#terminal{height:260px}header{padding:18px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Algorithme en pseudo code <span style="color:var(--accent)">SIMAC</span></h1>
+  <p>Interpréteur de pseudo-code — variables, types, conditions, choix et boucles.</p>
+  <p style="margin-top:8px;font-size:13px;color:var(--green)">Réalisé par Bambaa</p>
+</header>
+<main>
+  <section class="panel">
+    <div class="panel-head"><strong>Éditeur d'algorithme</strong><div class="actions"><button class="secondary" id="example">Exemple</button><button id="run">▶ Exécuter (Ctrl+E)</button></div></div>
+    <div class="editor-wrap"><pre id="lineNumbers" aria-hidden="true">1</pre><pre id="highlight" aria-hidden="true"></pre><textarea id="source" spellcheck="false" aria-label="Code de l'algorithme" autocapitalize="off" autocomplete="off"></textarea></div>
+    <div class="hint">Colle ton code ici. Syntaxe sensible aux mots-clés, mais pas aux majuscules/minuscules.</div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><strong>Terminal</strong><div class="actions"><button id="stop" class="stop" disabled>■ Arrêter (Ctrl+C)</button><button class="secondary" id="clear">Effacer</button></div></div>
+    <div id="terminal" aria-live="polite"><span class="muted">Le résultat apparaîtra ici…</span></div>
+    <div class="hint">Quand le programme attend une valeur, tape-la directement après la question dans le terminal puis appuie sur Entrée. Dans l’éditeur, Tab insère 4 espaces.</div>
+  </section>
+</main>
+<details class="syntax-panel">
+  <summary>Syntaxe SIMAC prise en charge</summary>
+  <div class="syntax-intro">
+    <p>Référence des syntaxes reconnues par l’interpréteur, avec des exemples à recopier dans l’éditeur. Les mots-clés ne sont pas sensibles aux majuscules/minuscules. Les instructions ordinaires se terminent par <code>;</code> ; les mots de structure sont écrits seuls sur leur ligne.</p>
+    <p class="syntax-note">Astuce : clique sur « Exemple » pour charger un programme de démonstration, puis sur « Exécuter ».</p>
+  </div>
+  <div class="syntax-grid">
+    <article class="syntax-card">
+      <h3>1. Structure d’un algorithme</h3>
+      <p>Le nom de l’algorithme est facultatif. Le programme doit contenir <code>Debut</code> et se terminer par <code>Fin.</code></p>
+      <pre><code>Algorithme Bonjour ;
+Debut
+    Ecrire("Bonjour SIMAC !");
+Fin.</code></pre>
+    </article>
+    <article class="syntax-card">
+      <h3>2. Variables et constantes</h3>
+      <p>Déclare les variables dans <code>Variable</code>. Les constantes peuvent être déclarées avec ou sans type explicite.</p>
+      <pre><code>Constante
+    AGE_MAJEUR = 18 ;
+    PI : Reel = 3.14 ;
+Variable
+    age : Entier ;
+    nom : Chaine ;
+    moyenne : Reel ;
+    actif : Booleen ;
+Debut
+    age <- 20 ;
+    nom <- "Awa" ;
+    moyenne <- 15.5 ;
+    actif <- Vrai ;
+    Ecrire(nom, age) ;
+Fin.</code></pre>
+      <p class="syntax-note">Types reconnus : <code>Entier</code>, <code>Reel</code>, <code>Texte</code>, <code>Chaine</code>, <code>Caractere</code>, <code>Booleen</code> (avec variantes accentuées pour certains noms).</p>
+    </article>
+    <article class="syntax-card">
+      <h3>3. Affectation et calculs</h3>
+      <p>Les trois écritures d’affectation acceptées sont <code>&lt;-</code>, <code>←</code> et <code>:=</code>.</p>
+      <pre><code>Variable
+    a, b, resultat : Entier ;
+Debut
+    a <- 12 ;
+    b := 5 ;
+    resultat <- a + b * 2 ;
+    Ecrire(resultat) ;
+Fin.</code></pre>
+      <p>Opérations : <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code>, <code>%</code>, <code>DIV</code>, <code>MOD</code>. <code>%</code> et <code>MOD</code> calculent le reste ; <code>DIV</code> la division entière.</p>
+    </article>
+    <article class="syntax-card">
+      <h3>4. Lire et écrire</h3>
+      <p><code>Lire(...)</code> attend la saisie dans le terminal. <code>Ecrire(...)</code>, <code>Écrire(...)</code> et <code>Afficher(...)</code> affichent un résultat.</p>
+      <pre><code>Variable
+    prenom : Chaine ;
+    age : Entier ;
+Debut
+    Ecrire("Ton prenom : ") ;
+    Lire(prenom) ;
+    Ecrire("Ton age : ") ;
+    Lire(age) ;
+    Ecrire("Bonjour", prenom) ;
+    Ecrire("Age :", age) ;
+Fin.</code></pre>
+    </article>
+    <article class="syntax-card">
+      <h3>5. Conditions Si / Sinon</h3>
+      <p>Une condition se termine par <code>Alors</code>, puis le bloc se ferme avec <code>FinSi</code>.</p>
+      <pre><code>Variable
+    note : Reel ;
+Debut
+    Ecrire("Saisis ta note : ") ;
+    Lire(note) ;
+    Si note >= 10 Alors
+        Ecrire("Admis") ;
+    Sinon
+        Ecrire("A revoir") ;
+    FinSi ;
+Fin.</code></pre>
+      <p>Comparaisons : <code>=</code>, <code>&lt;&gt;</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>. Logique : <code>ET</code>, <code>OU</code>, <code>NON</code>.</p>
+    </article>
+    <article class="syntax-card">
+      <h3>6. Choix SelonQue</h3>
+      <p>Chaque branche commence par <code>Cas valeur :</code>. La branche facultative <code>Sinon</code> traite les autres valeurs.</p>
+      <pre><code>Variable
+    choix : Entier ;
+Debut
+    Ecrire("Choisis une option (1 = Accueil, 2 = Cours) : ") ;
+    Lire(choix) ;
+    SelonQue choix Vaut
+        Cas 1 : Ecrire("Accueil") ;
+        Cas 2 : Ecrire("Cours") ;
+        Sinon : Ecrire("Choix inconnu") ;
+    FinSelonQue ;
+Fin.</code></pre>
+    </article>
+    <article class="syntax-card">
+      <h3>7. Boucle Pour</h3>
+      <p>Le compteur doit être déclaré. Le pas est facultatif et vaut <code>1</code> par défaut.</p>
+      <pre><code>Variable
+    i : Entier ;
+Debut
+    Pour i <- 1 à 5 Faire
+        Ecrire("Tour", i) ;
+    FinPour ;
+Fin.</code></pre>
+      <p>Avec un pas personnalisé : <code>Pour i &lt;- 2 à 10 Pas 2 Faire</code>.</p>
+    </article>
+    <article class="syntax-card">
+      <h3>8. Boucles TantQue et Répéter</h3>
+      <pre><code>Variable
+    i : Entier ;
+Debut
+    i <- 1 ;
+    TantQue i <= 3 Faire
+        Ecrire(i) ;
+        i <- i + 1 ;
+    FinTantQue ;
+
+    Repeter
+        i <- i - 1 ;
+    Jusqu'à i = 0 ;
+Fin.</code></pre>
+      <p><code>TantQue ... Faire</code> teste avant le bloc. <code>Repeter ... Jusqu'à</code> exécute le bloc au moins une fois.</p>
+    </article>
+    <article class="syntax-card">
+      <h3>9. Tableaux à une ou plusieurs dimensions</h3>
+      <p>Les bornes sont inclusives. Les indices doivent rester dans les bornes déclarées.</p>
+      <pre><code>Variable
+    T : Tableau[1..4] d'entier ;
+    M : Tableau[1..2, 1..3] de Reel ;
+    i : Entier ;
+Debut
+    T[1] <- 10 ;
+    T[2] <- 20 ;
+    M[1,2] <- 4.5 ;
+    Ecrire(T[1], M[1,2]) ;
+    Pour i <- 1 à 4 Faire
+        Ecrire(T[i]) ;
+    FinPour ;
+Fin.</code></pre>
+      <p>Les tableaux sont initialisés avec la valeur par défaut de leur type. Les indices sont écrits entre crochets : <code>T[i]</code>, <code>M[i,j]</code>.</p>
+    </article>
+    <article class="syntax-card">
+      <h3>10. Fonctions intégrées</h3>
+      <pre><code>Variable
+    x : Reel ;
+    n : Entier ;
+    texte : Chaine ;
+Debut
+    x <- Racine(81) ;
+    n <- Entier(-7.8) ;
+    texte <- "SIMAC" ;
+    Ecrire(x) ;
+    Ecrire(Abs(-12)) ;
+    Ecrire(Longueur(texte)) ;
+Fin.</code></pre>
+    </article>
+  </div>
+  <div class="syntax-limitations">
+    <h3>À savoir</h3>
+    <ul>
+      <li>Les instructions de lecture se font directement dans le terminal.</li>
+      <li>Les tableaux utilisent des indices entiers et des bornes inclusives.</li>
+      <li>Pour arrêter un programme en cours, clique sur « Arrêter » ou utilise Ctrl+C.</li>
+    </ul>
+  </div>
+</details>
+<script>
+const $ = id => document.getElementById(id);
+const examples = {
+base: `Algorithme Test ;
+Constante
+    AGE_MAJEUR = 18 ;
+Variable
+    age : entier ;
+    nom : chaine ;
+Debut
+    Ecrire("Quel âge as-tu : ") ;
+    Lire(age) ;
+    Si age >= AGE_MAJEUR Alors
+        Ecrire("Tu es majeur.") ;
+    Sinon
+        Ecrire("Tu es mineur.") ;
+    FinSi ;
+Fin.`
+};
+$('source').value = examples.base;
+$('example').addEventListener('click',()=>{ $('source').value=examples.base; highlightCode(); });
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function highlightCode(){
+ const src=$('source').value;
+ $('lineNumbers').textContent=Array.from({length:src.split('\n').length},(_,i)=>i+1).join('\n');
+ // Les chaînes sont reconnues avant les mots-clés pour préserver l’apostrophe de Jusqu'à.
+ const escaped=escapeHtml(src);
+ const pattern=/("(?:\\.|[^"\\])*"|\/\*[\s\S]*?\*\/|\/\/[^\n]*|Jusqu[’']à(?![\p{L}\p{N}_])|\b(?:Algorithme|Constante|Constantes|Variable|Variables|Début|Debut|FinSi|FinSelonQue|FinPour|FinTantQue|Fin|Si|Alors|Sinon|SelonQue|Vaut|Cas|Pour|à|pas|Faire|TantQue|Tant|Que|Répéter|Repeter|Jusqua|Lire|Écrire|Ecrire|Afficher|Vrai|Faux|ET|OU|NON|DIV|MOD|Tableau|d|Racine|RacineCarre|RacineCarree|sqrt|Abs|Entier|Longueur|Arrondi)\b|\b(?:Entier|Réel|Reel|Texte|Chaîne|Chaine|Caractère|Caractere|Booléen|Booleen)\b|\b\d+(?:\.\d+)?\b|<-|←|:=|<>|<=|>=|[+\-*\/%^=<>])/giu;
+ $('highlight').innerHTML=escaped.replace(pattern,token=>{
+  let cls='op';
+  if(token.startsWith('"'))cls='str';
+  else if(token.startsWith('//')||token.startsWith('/*'))cls='comment';
+  else if(/^Jusqu[’']à$/iu.test(token)||/^(Algorithme|Constante|Constantes|Variable|Variables|Début|Debut|FinSi|FinSelonQue|FinPour|FinTantQue|Fin|Si|Alors|Sinon|SelonQue|Vaut|Cas|Pour|à|pas|Faire|TantQue|Tant|Que|Répéter|Repeter|Jusqua|Lire|Écrire|Ecrire|Afficher|Vrai|Faux|ET|OU|NON|DIV|MOD|d|Racine|RacineCarre|RacineCarree|sqrt|Abs|Entier|Longueur|Arrondi)$/iu.test(token))cls='kw';
+  else if(/^(Entier|Réel|Reel|Texte|Chaîne|Chaine|Caractère|Caractere|Booléen|Booleen|Tableau)$/iu.test(token))cls='typ';
+  else if(/^\d/u.test(token))cls='num';
+  return `<span class="${cls}">${token}</span>`;
+ })+'\n';
+}
+$('source').addEventListener('input',highlightCode);
+$('source').addEventListener('keydown',e=>{
+ if(e.key==='Tab'){
+  e.preventDefault();
+  const el=e.currentTarget;
+  el.setRangeText('    ',el.selectionStart,el.selectionEnd,'end');
+  highlightCode();
+ }
+});
+$('source').addEventListener('scroll',()=>{
+ $('highlight').scrollTop=$('source').scrollTop;
+ $('highlight').scrollLeft=$('source').scrollLeft;
+ $('lineNumbers').scrollTop=$('source').scrollTop;
+});
+highlightCode();
+
+let inputResolver=null, stopRequested=false, programRunning=false;
+function write(text='',cls=''){
+ const term=$('terminal');
+ if(term.querySelector('.muted')&&term.textContent.includes('Le résultat apparaîtra'))term.innerHTML='';
+ const line=document.createElement('div');
+ if(cls)line.className=cls;
+ line.textContent=String(text);
+ term.appendChild(line);
+ term.scrollTop=term.scrollHeight;
+}
+function clearTerminal(){
+ if(inputResolver){write('Termine d’abord la saisie en cours.','err');return false;}
+ $('terminal').innerHTML='';
+ return true;
+}
+function askInput(prompt=''){
+ return new Promise(resolve=>{
+  inputResolver=value=>resolve(value);
+  const row=document.createElement('div');
+  row.className='terminal-input';
+  if(prompt){
+   const label=document.createElement('span');
+   label.textContent=prompt;
+   row.appendChild(label);
+  }
+  const input=document.createElement('input');
+  input.type='text';
+  input.autocomplete='off';
+  input.setAttribute('aria-label','Réponse au programme');
+  input.placeholder='';
+  input.style.width='12ch';
+  row.appendChild(input);
+  const term=$('terminal');
+  const previous=term.lastElementChild;
+  if(previous&&previous.className!=='terminal-input'&&!previous.classList?.contains('err'))previous.appendChild(row);
+  else term.appendChild(row);
+  input.focus();
+  $('terminal').scrollTop=$('terminal').scrollHeight;
+  input.addEventListener('keydown',e=>{
+   if(e.key==='Enter'){
+    e.preventDefault();
+    const value=input.value;
+    const r=inputResolver;
+    if(!r)return;
+    inputResolver=null;
+    const answer=document.createElement('span');
+    answer.textContent=value;
+    row.replaceWith(answer);
+    $('terminal').scrollTop=$('terminal').scrollHeight;
+    r(value);
+   }
+  });
+ });
+}
+function stopProgram(){
+ if(!programRunning)return;
+ stopRequested=true;
+ if(inputResolver){const r=inputResolver;inputResolver=null;r('');}
+ write('■ Arrêt du programme demandé.','err');
+}
+$('stop').onclick=stopProgram;
+document.addEventListener('keydown',e=>{
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='c'&&programRunning){
+  e.preventDefault();stopProgram();return;
+ }
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='e'){
+  e.preventDefault();if(!programRunning)$('run').click();
+ }
+});
+$('clear').onclick=()=>clearTerminal();
+$('run').onclick=async()=>{
+ const terminal=$('terminal');
+ terminal.scrollIntoView({behavior:'smooth',block:'start'});
+ terminal.setAttribute('tabindex','-1');
+ terminal.focus({preventScroll:true});
+ if(programRunning){write('Un programme est déjà en cours.','err');return;}
+ if(inputResolver){write('Termine d’abord la saisie demandée.','err');return;}
+ if(!clearTerminal())return;
+ stopRequested=false;
+ programRunning=true;
+ $('run').disabled=true;
+ $('stop').disabled=false;
+ try{
+  await runProgram($('source').value);
+  if(stopRequested)write('Programme arrêté.','err');
+  else write('✓ Exécution terminée.','ok');
+ }catch(e){
+  if(stopRequested)write('Programme arrêté.','err');
+  else write(e.message,'err');
+ }finally{
+  programRunning=false;stopRequested=false;
+  $('run').disabled=false;$('stop').disabled=true;
+  terminal.scrollTop=terminal.scrollHeight;
+ }
+};
+
+function norm(s){
+ s=s.trim();
+ if(/^jusqua\b/i.test(s)||/^jusqu['’]a\b/i.test(s))
+  throw Error("Syntaxe incorrecte : écris « Jusqu'à » avec le caractère à accentué.");
+ return s.replace(/^début$/i,'Debut')
+  .replace(/^debut$/i,'Debut')
+  .replace(/\btant\s+que\b/ig,'TantQue')
+  .replace(/[’‘]/g,"'")
+  .replace(/←/g,'<-')
+  .replace(/≠/g,'<>')
+  .replace(/≤/g,'<=')
+  .replace(/≥/g,'>=')
+  .replace(/jusqu['’]à/ig,'Jusqua')
+  .replace(/\brépéter\b/ig,'Repeter')
+  .replace(/\bsinon\s*si\b/ig,'Sinon Si');
+}
+function stripComments(source){
+ let out='',q='',esc=false,lineComment=false,blockComment=false;
+ for(let i=0;i<source.length;i++){
+  const c=source[i],n=source[i+1];
+  if(lineComment){
+   if(c==='\n'){lineComment=false;out+='\n';}
+   else out+=' ';
+   continue;
+  }
+  if(blockComment){
+   if(c==='*'&&n==='/'){out+='  ';i++;blockComment=false;continue;}
+   out+=c==='\n'?'\n':' ';
+   continue;
+  }
+  if(esc){out+=c;esc=false;continue;}
+  if(q&&c==='\\'){out+=c;esc=true;continue;}
+  if(c==='"'&&(!q||q===c)){q=q?'':c;out+=c;continue;}
+  if(!q&&c==='/'&&n==='/'){out+='  ';i++;lineComment=true;continue;}
+  if(!q&&c==='/'&&n==='*'){out+='  ';i++;blockComment=true;continue;}
+  out+=c;
+ }
+ if(blockComment)throw Error('Commentaire multiligne non terminé : ajoute */');
+ return out;
+}
+function uncomment(s){return stripComments(s);}
+function splitTop(s,sep=','){
+ let out=[],cur='',q='',depth=0,br=0;
+ for(let i=0;i<s.length;i++){
+  const c=s[i];
+  if(c==='"'&&s[i-1]!=='\\'&&(!q||q===c))q=q?'':c;
+  if(!q){
+   if(c==='(')depth++;
+   if(c===')')depth--;
+   if(c==='[')br++;
+   if(c===']')br--;
+   if(c===sep&&depth===0&&br===0){out.push(cur.trim());cur='';continue;}
+  }
+  cur+=c;
+ }
+ if(cur.trim())out.push(cur.trim());
+ return out;
+}
+function tokenize(s){
+ const out=[];let i=0;
+ while(i<s.length){
+  if(/\s/.test(s[i])){i++;continue;}
+  let r=s.slice(i),m;
+  if((m=r.match(/^"(?:\\.|[^"\\])*"/))){out.push({k:'str',v:m[0]});i+=m[0].length;continue;}
+  if((m=r.match(/^(?:\d+(?:\.\d+)?|\.\d+)/))){out.push({k:'num',v:Number(m[0])});i+=m[0].length;continue;}
+  if((m=r.match(/^(?:<=|>=|<>|!=|==|<-|:=|\.\.|[(),+\-*\/%^=<>\[\]])/))){out.push({k:'op',v:m[0]});i+=m[0].length;continue;}
+  if((m=r.match(/^[\p{L}_][\p{L}\p{N}_]*/u))){out.push({k:'id',v:m[0]});i+=m[0].length;continue;}
+  throw Error(`Erreur lexicale : caractère « ${s[i]} » inattendu dans « ${s} »`);
+ }
+ out.push({k:'eof',v:''});
+ return out;
+}
+function expression(src,env,arrays){
+ const t=tokenize(src);let p=0;
+ const peek=()=>t[p],take=()=>t[p++];
+ function primary(){
+  let x=take();
+  if(x.k==='num')return x.v;
+  if(x.k==='str')return JSON.parse(x.v);
+  if(x.v==='('){
+   let v=or();
+   if(take().v!==')')throw Error('parenthèse fermante manquante');
+   return v;
+  }
+  if(['+','-'].includes(x.v)){
+   let v=primary();
+   return x.v==='-'?-Number(v):Number(v);
+  }
+  if(x.k==='id'){
+   let u=x.v.toLowerCase();
+   if(u==='vrai')return true;
+   if(u==='faux')return false;
+   if(u==='non')return !truth(primary());
+   if(peek().v==='('&&['racine','racinecarre','racinecarree','sqrt','abs','arrondi','entier','longueur'].includes(u)){
+    take();
+    let arg=or();
+    if(take().v!==')')throw Error('parenthèse fermante manquante');
+    if(['racine','racinecarre','racinecarree','sqrt'].includes(u)){
+     if(Number(arg)<0)throw Error('racine carrée d’un nombre négatif');
+     return Math.sqrt(Number(arg));
+    }
+    if(u==='abs')return Math.abs(Number(arg));
+    if(u==='longueur')return [...String(arg)].length;
+    if(u==='arrondi')return Math.round(Number(arg));
+    return Math.trunc(Number(arg));
+   }
+   if(peek().v==='['){
+    take();
+    const indices=[or()];
+    while(peek().v===','){take();indices.push(or());}
+    if(take().v!==']')throw Error('crochet ] manquant');
+    if(arrays.has(u))return getArray(u,indices,arrays);
+    if(!env.has(u))throw Error(`variable « ${x.v} » non déclarée`);
+    const valeur=env.get(u);
+    if(typeof valeur==='string'){
+     if(indices.length!==1)throw Error(`la chaîne « ${x.v} » attend un seul indice`);
+     const pos=Number(indices[0]),caracteres=[...valeur];
+     if(!Number.isInteger(pos)||pos<1||pos>caracteres.length)
+      throw Error(`indice ${pos} hors limites pour la chaîne « ${x.v} »`);
+     return caracteres[pos-1];
+    }
+    throw Error(`« ${x.v} » n’est pas un tableau ni une chaîne`);
+   }
+   if(!env.has(u))throw Error(`variable « ${x.v} » non déclarée`);
+   return env.get(u);
+  }
+  throw Error(`expression invalide près de « ${x.v} »`);
+ }
+ function pow(){
+  let a=primary();
+  if(peek().v==='^'){take();a=Math.pow(Number(a),Number(unary()));}
+  return a;
+ }
+ function unary(){
+  if(['+','-'].includes(peek().v)){
+   let o=take().v,v=unary();
+   return o==='-'?-Number(v):Number(v);
+  }
+  return pow();
+ }
+ function mul(){
+  let a=unary();
+  while(['*','/','%','DIV','MOD'].includes(peek().v.toUpperCase())){
+   let o=take().v.toUpperCase(),b=unary();
+   if(['/','%','DIV','MOD'].includes(o)&&Number(b)===0)
+    throw Error('division par zéro');
+   a=o==='*'?Number(a)*Number(b):
+     o==='/'?Number(a)/Number(b):
+     o==='DIV'?Math.trunc(Number(a)/Number(b)):
+     Number(a)%Number(b);
+  }
+  return a;
+ }
+ function add(){
+  let a=mul();
+  while(['+','-'].includes(peek().v)){
+   let o=take().v,b=mul();
+   a=o==='+'&&(typeof a==='string'||typeof b==='string')?String(a)+String(b):
+     o==='+'?Number(a)+Number(b):Number(a)-Number(b);
+  }
+  return a;
+ }
+ function cmp(){
+  let a=add();
+  while(['=','==','<>','!=','<','>','<=','>='].includes(peek().v)){
+   let o=take().v,b=add();
+   switch(o){
+    case '=':case '==':a=a==b;break;
+    case '<>':case '!=':a=a!=b;break;
+    case '<':a=a<b;break;
+    case '>':a=a>b;break;
+    case '<=':a=a<=b;break;
+    case '>=':a=a>=b;break;
+   }
+  }
+  return a;
+ }
+ function and(){
+  let a=cmp();
+  while(peek().v.toUpperCase()==='ET'){
+   take();let b=cmp();a=truth(a)&&truth(b);
+  }
+  return a;
+ }
+ function or(){
+  let a=and();
+  while(peek().v.toUpperCase()==='OU'){
+   take();let b=and();a=truth(a)||truth(b);
+  }
+  return a;
+ }
+ let v=or();
+ if(peek().k!=='eof')throw Error(`élément inattendu « ${peek().v} »`);
+ return v;
+}
+function truth(v){
+ return v===true||(typeof v==='number'&&v!==0)||(typeof v==='string'&&v.length>0);
+}
+function getArray(name,indices,arrays){
+ const a=arrays.get(name);
+ if(!a)throw Error(`tableau « ${name} » non déclaré`);
+ if(!Array.isArray(indices))indices=[indices];
+ if(indices.length!==a.dims.length)throw Error(`${name} attend ${a.dims.length} indice(s)`);
+ let offset=0;
+ for(let k=0;k<a.dims.length;k++){
+  const idx=Number(indices[k]),d=a.dims[k];
+  if(!Number.isInteger(idx)||idx<d.low||idx>d.high)
+   throw Error(`indice ${idx} hors limites pour ${name}`);
+  offset=offset*(d.high-d.low+1)+(idx-d.low);
+ }
+ return a.data[offset];
+}
+function setTarget(target,value,env,types,constants,arrays){
+ let m=target.match(/^([\p{L}_][\p{L}\p{N}_]*)\s*\[\s*(.+)\s*\]$/u);
+ if(m){
+  const name=m[1].toLowerCase(),a=arrays.get(name);
+  if(!a)throw Error(`tableau « ${m[1]} » non déclaré`);
+  if(constants.has(name))throw Error(`impossible de modifier la constante « ${m[1]} »`);
+  const indices=splitTop(m[2]).map(ix=>expression(ix,env,arrays));
+  if(indices.length!==a.dims.length)throw Error(`${m[1]} attend ${a.dims.length} indice(s)`);
+  let offset=0;
+  for(let k=0;k<a.dims.length;k++){
+   const idx=Number(indices[k]),d=a.dims[k];
+   if(!Number.isInteger(idx)||idx<d.low||idx>d.high)
+    throw Error(`indice ${idx} hors limites pour ${m[1]}`);
+   offset=offset*(d.high-d.low+1)+(idx-d.low);
+  }
+  a.data[offset]=coerce(value,a.type);
+  return;
+ }
+ const name=target.trim().toLowerCase();
+ if(!env.has(name))throw Error(`variable « ${target} » non déclarée`);
+ if(constants.has(name))throw Error(`impossible de modifier la constante « ${target} »`);
+ env.set(name,coerce(value,types.get(name)));
+}
+function coerce(v,type){
+ if(type==='entier'){
+  const n=Number(v);
+  if(!Number.isInteger(n))throw Error('la valeur doit être un entier');
+  return n;
+ }
+ if(['réel','reel'].includes(type)){
+  const n=Number(v);
+  if(!Number.isFinite(n))throw Error('la valeur doit être un nombre réel');
+  return n;
+ }
+ if(['chaine','chaîne','caractère','caractere'].includes(type)){
+  if(type.startsWith('caract')){
+   const s=String(v);
+   if([...s].length!==1)throw Error('la valeur doit contenir un seul caractère');
+   return s;
+  }
+  return String(v);
+ }
+ if(type.includes('bool')){
+  if(typeof v!=='boolean')throw Error('la valeur doit être booléenne (Vrai/Faux)');
+  return v;
+ }
+ return v;
+}
+
+function parseProgram(source){
+ const lines=stripComments(source).split(/\r?\n/)
+  .map((raw,i)=>({s:norm(raw).trim(),n:i+1})).filter(x=>x.s);
+ const env=new Map(),types=new Map(),constants=new Set(),arrays=new Map();
+ let section='',body=false,ended=false;
+ const bodyLines=[];
+
+ for(const l of lines){
+  let s=l.s.replace(/\s*;\s*$/,'').trim();
+  if(/^algorithme\b/i.test(s))continue;
+  let head=s.match(/^(variable|variables|constante|constantes)\b\s*(.*)$/i);
+  if(head){
+   section=/^constante/i.test(head[1])?'constante':'variable';
+   s=head[2].trim();
+   if(!s)continue;
+  }
+  if(/^debut$/i.test(s)){body=true;section='';continue;}
+  if(/^fin\.?$/i.test(s)){ended=true;continue;}
+
+  if(!body&&section){
+   if(section==='variable'&&!s.includes(':')&&/[=]/.test(s)){
+    const pairs=splitTop(s,',');
+    for(const pair of pairs){
+     const im=pair.match(/^([\p{L}_][\p{L}\p{N}_]*)\s*=\s*(.+)$/u);
+     if(!im)throw Error(`Erreur syntaxique ligne ${l.n} : initialisation invalide`);
+     const key=im[1].toLowerCase();
+     if(!env.has(key))throw Error(`Erreur syntaxique ligne ${l.n} : variable « ${im[1]} » doit être déclarée avant son initialisation`);
+     env.set(key,coerce(/^".*"$/.test(im[2])?im[2].slice(1,-1):Number.isFinite(Number(im[2]))?Number(im[2]):im[2],types.get(key)));
+    }
+    continue;
+   }
+
+   let m=s.match(/^([\p{L}_][\p{L}\p{N}_]*(?:\s*,\s*[\p{L}_][\p{L}\p{N}_]*)*)\s*:\s*(entier|réel|reel|chaine|chaîne|texte|caractère|caractere|booléen|booleen)(?:\s*=\s*(.+))?$/iu);
+
+   if(section==='constante'&&!m){
+    const pairs=splitTop(s,',').map(x=>x.trim()).filter(Boolean);
+    if(pairs.length&&pairs.every(x=>/^[\p{L}_][\p{L}\p{N}_]*\s*=\s*.+$/u.test(x))){
+     for(const pair of pairs){
+      const cm=pair.match(/^([\p{L}_][\p{L}\p{N}_]*)\s*=\s*(.+)$/u);
+      const key=cm[1].toLowerCase(),raw=cm[2].trim();
+      let v;
+      if(/^"(?:\\.|[^"\\])*"$/.test(raw)||/^'.*'$/.test(raw))v=raw.slice(1,-1);
+      else if(/^vrai$/i.test(raw))v=true;
+      else if(/^faux$/i.test(raw))v=false;
+      else if(Number.isFinite(Number(raw))&&raw!=='')v=Number(raw);
+      else throw Error(`Erreur syntaxique ligne ${l.n} : valeur de constante invalide pour « ${cm[1]} »`);
+      if(env.has(key)||arrays.has(key))throw Error(`Erreur syntaxique ligne ${l.n} : « ${cm[1]} » déclaré deux fois`);
+      env.set(key,v);
+      types.set(key,typeof v==='number'?(Number.isInteger(v)?'entier':'réel'):typeof v==='boolean'?'booléen':'chaine');
+      constants.add(key);
+     }
+     continue;
+    }
+   }
+
+   let ar=s.match(/^([\p{L}_][\p{L}\p{N}_]*)\s*:\s*tableau\s*\[\s*((?:-?\d+\s*\.\.\s*-?\d+)(?:\s*,\s*-?\d+\s*\.\.\s*-?\d+)*)\s*\]\s*d(?:e\s*|['’]\s*)(entier|réel|reel|chaine|chaîne|texte|caractère|caractere|booléen|booleen)$/iu);
+   if(ar){
+    if(section==='constante')throw Error(`Erreur syntaxique ligne ${l.n} : un tableau constant n'est pas pris en charge`);
+    let name=ar[1].toLowerCase(),typ=ar[3].toLowerCase();
+    let dims=splitTop(ar[2]).map(part=>{
+     const mm=part.match(/(-?\d+)\s*\.\.\s*(-?\d+)/);
+     return {low:+mm[1],high:+mm[2]};
+    });
+    if(dims.some(d=>d.low>d.high))throw Error(`Erreur syntaxique ligne ${l.n} : bornes de tableau invalides`);
+    if(env.has(name)||arrays.has(name))throw Error(`Erreur syntaxique ligne ${l.n} : « ${name} » déjà déclaré`);
+    const count=dims.reduce((n,d)=>n*(d.high-d.low+1),1);
+    if(count>100000)throw Error(`Erreur syntaxique ligne ${l.n} : tableau trop grand`);
+    arrays.set(name,{low:dims[0].low,high:dims[0].high,dims,type:typ,data:Array(count).fill().map(()=>defaultValue(typ))});
+    continue;
+   }
+
+   if(!m)throw Error(`Erreur syntaxique ligne ${l.n} : déclaration invalide`);
+   const names=m[1].split(',').map(x=>x.trim()),typ=m[2].toLowerCase(),init=m[3];
+   if(section==='constante'&&!init)throw Error(`Erreur syntaxique ligne ${l.n} : constante sans valeur`);
+   if(section==='variable'&&init)throw Error(`Erreur syntaxique ligne ${l.n} : initialisation de variable dans la déclaration non prise en charge; affecte-la après Debut`);
+   let v=defaultValue(typ);
+   if(init!==undefined){
+    if(/^".*"$|^'.*'$/.test(init))v=init.slice(1,-1);
+    else if(/^vrai$/i.test(init))v=true;
+    else if(/^faux$/i.test(init))v=false;
+    else if(Number.isFinite(Number(init)))v=Number(init);
+    else throw Error(`Erreur syntaxique ligne ${l.n} : valeur initiale de constante invalide`);
+    v=coerce(v,typ);
+   }
+   for(const nm of names){
+    const key=nm.toLowerCase();
+    if(env.has(key)||arrays.has(key))throw Error(`Erreur syntaxique ligne ${l.n} : « ${nm} » déclaré deux fois`);
+    env.set(key,v);types.set(key,typ);
+    if(section==='constante')constants.add(key);
+   }
+   continue;
+  }
+  if(!body)throw Error(`Erreur syntaxique ligne ${l.n} : attendu Variable, Constante ou Debut`);
+  bodyLines.push(l);
+ }
+ if(!body)throw Error('Erreur syntaxique : le programme doit contenir Debut');
+ if(!ended)throw Error('Erreur syntaxique : le programme doit se terminer par Fin.');
+
+ let i=0;
+ const parseBlock=(stops=[])=>{
+  const out=[];
+  while(i<bodyLines.length){
+   const l=bodyLines[i],s=l.s.replace(/\s*;\s*$/,'').trim();
+   if(stops.some(re=>re.test(s)))break;
+   let m;
+
+   if((m=s.match(/^si\s+(.+?)\s+alors$/i))){
+    i++;
+    const yes=parseBlock([/^sinon$/i,/^sinon\s+si\b/i,/^finsi:?$/i]);
+    let no=[],sharedEnd=false;
+    if(i<bodyLines.length&&/^sinon\s+si\b/i.test(bodyLines[i].s.replace(/;$/,'').trim())){
+     const alt=bodyLines[i].s.replace(/;$/,'').trim().replace(/^sinon\s+/i,'');
+     bodyLines[i]={...bodyLines[i],s:alt};
+     no=parseBlock([/^sinon$/i,/^finsi:?$/i]);
+     sharedEnd=true;
+    }
+    if(i<bodyLines.length&&/^sinon$/i.test(bodyLines[i].s.replace(/;$/,'').trim())){
+     i++;no=parseBlock([/^finsi:?$/i]);
+    }
+    if(!sharedEnd){
+     if(i>=bodyLines.length||!/^finsi:?$/i.test(bodyLines[i].s.replace(/;$/,'').trim()))
+      throw Error(`Erreur syntaxique ligne ${l.n} : FinSi manquant`);
+     i++;
+    }
+    out.push({k:'if',cond:m[1],yes,no,n:l.n});
+    continue;
+   }
+
+   if(/^sinon|^finsi:?$|^finpour;?$|^fintantque;?$|^finsegonque|^finselonque:?$|^jusqua\b/i.test(s))break;
+
+   if((m=s.match(/^pour\s+([\p{L}_][\p{L}\p{N}_]*)\s*<-\s*(.+?)\s+à\s+(.+?)(?:\s+pas\s+(.+?))?\s+faire$/iu))){
+    i++;
+    const b=parseBlock([/^finpour$/i]);
+    if(i>=bodyLines.length||!/^finpour$/i.test(bodyLines[i].s.replace(/;$/,'').trim()))
+     throw Error(`Erreur syntaxique ligne ${l.n} : FinPour manquant`);
+    i++;
+    out.push({k:'for',name:m[1].toLowerCase(),start:m[2],end:m[3],step:m[4]||'1',body:b,n:l.n});
+    continue;
+   }
+
+   if((m=s.match(/^tant\s*que\s+(.+?)\s+faire$/i))){
+    i++;
+    const b=parseBlock([/^fintantque$/i]);
+    if(i>=bodyLines.length||!/^fintantque$/i.test(bodyLines[i].s.replace(/;$/,'').trim()))
+     throw Error(`Erreur syntaxique ligne ${l.n} : FinTantQue manquant`);
+    i++;
+    out.push({k:'while',cond:m[1],body:b,n:l.n});
+    continue;
+   }
+
+   if(/^repeter$/i.test(s)){
+    i++;
+    const b=parseBlock([/^jusqua\b/i]);
+    if(i>=bodyLines.length)throw Error(`Erreur syntaxique ligne ${l.n} : Jusqu'à manquant`);
+    const jm=bodyLines[i].s.replace(/;$/,'').trim().match(/^jusqua\s+(.+)$/i);
+    if(!jm)throw Error(`Erreur syntaxique ligne ${l.n} : condition Jusqu'à manquante`);
+    i++;
+    out.push({k:'repeat',cond:jm[1],body:b,n:l.n});
+    continue;
+   }
+
+   if((m=s.match(/^selonque\s+(.+?)\s+vaut$/i))){
+    i++;
+    const cases=[];let otherwise=[];
+    while(i<bodyLines.length&&!/^finselonque$/i.test(bodyLines[i].s.replace(/;$/,'').trim())){
+     const cl=bodyLines[i],cs=cl.s.replace(/;$/,'').trim();
+     let cm=cs.match(/^cas\s+(.+?)\s*:\s*(.*)$/i);
+     if(cm){
+      i++;
+      const cbody=[];
+      if(cm[2].trim())cbody.push(parseInline(cm[2],cl.n));
+      while(i<bodyLines.length&&!/^cas\b|^sinon\s*:?$/i.test(bodyLines[i].s.replace(/;$/,'').trim())&&!/^finselonque$/i.test(bodyLines[i].s.replace(/;$/,'').trim())){
+       const chunk=parseBlock([/^cas\b/i,/^sinon\s*:?$/i,/^finselonque$/i]);
+       cbody.push(...chunk);
+       if(i<bodyLines.length&&!/^cas\b|^sinon\s*:?$/i.test(bodyLines[i].s.replace(/;$/,'').trim()))break;
+      }
+      cases.push({value:cm[1],body:cbody});
+      continue;
+     }
+     let sm=cs.match(/^sinon\s*:?\s*(.*)$/i);
+     if(sm){
+      i++;
+      if(sm[1])otherwise.push(parseInline(sm[1],cl.n));
+      otherwise.push(...parseBlock([/^finselonque$/i]));
+      break;
+     }
+     throw Error(`Erreur syntaxique ligne ${cl.n} : attendu Cas valeur : ou Sinon`);
+    }
+    if(i>=bodyLines.length)throw Error(`Erreur syntaxique ligne ${l.n} : FinSelonQue manquant`);
+    i++;
+    out.push({k:'switch',expr:m[1],cases,otherwise,n:l.n});
+    continue;
+   }
+
+   if((m=s.match(/^(?:écrire|ecrire|afficher|lire)\s*\((.*)\)\s*;?$/i))){
+    const name=m[0].match(/^([^\s(]+)/)[1].toLowerCase(),args=splitTop(m[1]);
+    if(!args.length)throw Error(`Erreur syntaxique ligne ${l.n} : ${name} attend un argument`);
+    out.push({k:name==='lire'?'read':'write',args,n:l.n});
+    i++;continue;
+   }
+
+   if((m=s.match(/^(.+?)\s*(<-|:=)\s*(.+)$/))){
+    out.push({k:'assign',target:m[1].trim(),expr:m[3].trim(),n:l.n});
+    i++;continue;
+   }
+
+   if(!l.s.trim().endsWith(';')&&!/^(sinon|finsi|finpour|fintantque|finselonque|repeter|jusqua\b)/i.test(s))
+    throw Error(`Erreur syntaxique ligne ${l.n} : point-virgule « ; » obligatoire`);
+   throw Error(`Erreur syntaxique ligne ${l.n} : instruction inconnue « ${s} »`);
+  }
+  return out;
+ };
+ const ast=parseBlock();
+ if(i<bodyLines.length)throw Error(`Erreur syntaxique ligne ${bodyLines[i].n} : structure inattendue « ${bodyLines[i].s} »`);
+ return {ast,env,types,constants,arrays};
+}
+
+function defaultValue(t){
+ return ['chaine','chaîne','texte','caractère','caractere'].includes(t)?'':t.includes('bool')?false:0;
+}
+function parseInline(s,n){
+ const m=s.match(/^(?:écrire|ecrire|afficher|lire)\s*\((.*)\)\s*;?$/i);
+ if(m)return{k:/^lire/i.test(s)?'read':'write',args:splitTop(m[1]),n};
+ const a=s.match(/^(.+?)\s*(<-|:=)\s*(.+)$/);
+ if(a)return{k:'assign',target:a[1].trim(),expr:a[3].trim(),n};
+ throw Error(`Erreur syntaxique ligne ${n} : instruction de Cas invalide`);
+}
+
+async function runProgram(source){
+ const {ast,env,types,constants,arrays}=parseProgram(source);
+ let steps=0;
+ const tick=async()=>{
+  if(stopRequested)throw Error('Programme arrêté.');
+  if(++steps>100000)throw Error('Limite de sécurité atteinte : boucle potentiellement infinie (100 000 instructions).');
+  if(steps%250===0){
+   await new Promise(resolve=>setTimeout(resolve,0));
+   if(stopRequested)throw Error('Programme arrêté.');
+  }
+ };
+ const ev=x=>expression(x,env,arrays);
+
+ async function exec(list){
+  for(const st of list){
+   await tick();
+   try{
+    if(st.k==='write'){
+     write(st.args.map(a=>{
+      const v=ev(a);
+      return v===true?'Vrai':v===false?'Faux':v;
+     }).join(' '));
+    }else if(st.k==='read'){
+     for(const target of st.args){
+      const m=target.match(/^([\p{L}_][\p{L}\p{N}_]*)(?:\[(.+)\])?$/u);
+      if(!m)throw Error('Lire attend une variable ou un élément de tableau');
+      const name=m[1].toLowerCase();
+      if(!env.has(name)&&!arrays.has(name))throw Error(`variable « ${m[1]} » non déclarée`);
+      const raw=await askInput('');
+      let type=types.get(name);
+      if(m[2])type=arrays.get(name).type;
+      let v=raw;
+      if(['entier','réel','reel'].includes(type)){
+       v=Number(raw);
+       if(!raw.trim()||!Number.isFinite(v)||(type==='entier'&&!Number.isInteger(v)))
+        throw Error(`saisie invalide pour ${target} : nombre ${type} attendu`);
+      }else if(type.includes('bool')){
+       if(/^vrai$/i.test(raw))v=true;
+       else if(/^faux$/i.test(raw))v=false;
+       else throw Error(`saisie invalide pour ${target} : entre Vrai ou Faux`);
+      }else if(type.startsWith('caract')){
+       if([...raw].length!==1)throw Error(`saisie invalide pour ${target} : un seul caractère attendu`);
+      }
+      setTarget(target,v,env,types,constants,arrays);
+     }
+    }else if(st.k==='assign'){
+     setTarget(st.target,ev(st.expr),env,types,constants,arrays);
+    }else if(st.k==='if'){
+     await exec(truth(ev(st.cond))?st.yes:st.no);
+    }else if(st.k==='while'){
+     let guard=0;
+     while(truth(ev(st.cond))){
+      if(++guard>100000)throw Error('Limite de sécurité atteinte dans TantQue');
+      await exec(st.body);
+     }
+    }else if(st.k==='repeat'){
+     let guard=0;
+     do{
+      if(++guard>100000)throw Error('Limite de sécurité atteinte dans Répéter');
+      await exec(st.body);
+     }while(!truth(ev(st.cond)));
+    }else if(st.k==='for'){
+     if(!env.has(st.name))throw Error(`compteur « ${st.name} » non déclaré`);
+     let start=Number(ev(st.start)),end=Number(ev(st.end)),step=Number(ev(st.step));
+     if(!Number.isFinite(start)||!Number.isFinite(end)||!Number.isFinite(step)||step===0)
+      throw Error('bornes ou pas de Pour invalides');
+     setTarget(st.name,start,env,types,constants,arrays);
+     let guard=0;
+     while(step>0?env.get(st.name)<=end:env.get(st.name)>=end){
+      if(++guard>100000)throw Error('Limite de sécurité atteinte dans Pour');
+      await exec(st.body);
+      setTarget(st.name,Number(env.get(st.name))+step,env,types,constants,arrays);
+     }
+    }else if(st.k==='switch'){
+     const v=ev(st.expr);let found=false;
+     for(const c of st.cases){
+      if(ev(c.value)===v){await exec(c.body);found=true;break;}
+     }
+     if(!found)await exec(st.otherwise);
+    }
+   }catch(e){
+    throw Error(`Erreur d'exécution ligne ${st.n} : ${e.message}`);
+   }
+  }
+ }
+ await exec(ast);
+}
+</script>
+</body>
+</html>

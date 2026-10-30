@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Atelier Réseaux — Révision CCNA</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1b2430;--mut:#5d6b7c;--ac:#0b2a5b;--ac2:#e8eef8;--bd:#dde3ea;--ok:#1a7f4b;--ko:#b42318}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 system-ui,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+#side{position:fixed;inset:0 auto 0 0;width:270px;background:var(--card);border-right:1px solid var(--bd);overflow:auto;padding:20px 14px;z-index:5}
+#side h1{font-size:18px;color:var(--ac);margin:0 8px 14px}#side a{display:block;padding:6px 10px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:14.5px}
+#side a:hover,#side a.on{background:var(--ac2);color:var(--ac)}#side small{display:block;margin:14px 10px 4px;color:var(--mut);font-size:13px}
+#side input{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:6px;margin-bottom:10px;font:inherit;font-size:14px}
+main{margin-left:270px;padding:36px 44px;max-width:1000px}
+#burger{display:none;position:fixed;top:10px;left:10px;z-index:6;background:var(--ac);color:#fff;border:0;border-radius:6px;padding:8px 12px;font-size:16px}
+h2{font-size:28px;color:var(--ac);margin:0 0 6px}h3{color:var(--ac);margin:26px 0 8px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:18px 22px;margin:14px 0;box-shadow:0 1px 2px rgba(11,42,91,.05)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:6px;padding:8px 16px;font:inherit;font-size:14.5px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.s{background:var(--ac2);color:var(--ac)}.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;display:block;overflow-x:auto}th,td{border:1px solid var(--bd);padding:7px 10px;text-align:left}th{background:var(--ac2);color:var(--ac)}
+pre{background:#0f1b2d;color:#e6edf7;padding:14px;border-radius:6px;overflow:auto;font:13.5px/1.5 ui-monospace,Consolas,monospace;margin:8px 0 0}
+.cp{float:right;font-size:12px;padding:3px 9px;margin-top:-30px;margin-right:8px;position:relative}
+.bar{height:8px;background:var(--ac2);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ac)}
+.note{border-left:3px solid var(--ac);background:var(--ac2);padding:8px 14px;border-radius:4px;font-size:14.5px}
+.opt{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--bd);border-radius:6px;padding:10px 14px;margin:8px 0;font:inherit;cursor:pointer}
+.opt:hover{border-color:var(--ac)}.opt.sel{border-color:var(--ac);background:var(--ac2)}.opt.ok{border-color:var(--ok);background:#e9f6ef}.opt.ko{border-color:var(--ko);background:#fdecea}
+.lay{padding:10px 14px;border:1px solid var(--bd);border-radius:6px;margin:4px 0;background:#fff;transition:.2s}.lay.on{background:var(--ac);color:#fff}
+select,.f input{padding:7px;border:1px solid var(--bd);border-radius:6px;font:inherit;margin:0 8px 8px 0}
+#term{background:#0f1b2d;color:#e6edf7;border-radius:8px;padding:14px;height:340px;overflow:auto;font:13.5px/1.45 ui-monospace,Consolas,monospace;white-space:pre-wrap}
+#tin{background:transparent;border:0;color:#fff;font:inherit;outline:0;width:60%}
+@media(max-width:860px){#side{transform:translateX(-100%);transition:.2s}#side.open{transform:none}#burger{display:block}main{margin:0;padding:60px 16px 30px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<button id="burger" aria-label="Menu" onclick="side.classList.toggle('open')">☰</button>
+<nav id="side"></nav><main id="main"></main>
+<script>
+const $=s=>document.querySelector(s),side=$('#side'),main=$('#main');
+const tb=(h,r)=>`<table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(l=>`<tr>${l.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table>`;
+const code=t=>`<pre>${t}</pre><button class="btn s cp" onclick="cp(this)">Copier</button>`;
+const sim=t=>`<div class="note"><b>Sortie simulée</b> (exemple pédagogique, pas un vrai IOS)</div>`+code(t);
+/* ====== COURS ====== */
+const M=[
+['Introduction aux réseaux',['Définir LAN, WAN, WLAN','Distinguer les équipements','Comprendre bande passante et latence'],
+`<p>Un réseau relie des terminaux (PC, serveurs, téléphones) via des équipements intermédiaires (switches, routeurs, points d’accès) et des supports (cuivre, fibre, radio). Il permet de partager des ressources et de communiquer.</p>`+tb(['Type','Portée','Exemple'],[['LAN','Local (bâtiment)','Réseau d’une école'],['WLAN','LAN sans fil (Wi-Fi)','Point d’accès 802.11'],['WAN','Étendu (villes, pays)','Liaison opérateur, Internet']])+`<h3>Notions clés</h3><p><b>Bande passante</b> : capacité maximale en bit/s. <b>Débit</b> : volume réellement transféré. <b>Latence</b> : délai d’acheminement. Un lien de 1 Gbit/s peut avoir un débit réel de 700 Mbit/s.</p><p><b>Topologies</b> : étoile (la plus courante en LAN avec un switch central), bus, anneau, maillée.</p>`],
+['Modèles OSI et TCP/IP',['Citer les 7 couches OSI et leur rôle','Faire correspondre OSI et TCP/IP','Comparer TCP/UDP, MAC/IP'],
+`<p>Le modèle OSI (ISO) découpe la communication en 7 couches pour normaliser et faciliter le dépannage. TCP/IP est le modèle réellement utilisé sur Internet.</p>`+tb(['N°','OSI','PDU','Rôle','Exemples','TCP/IP (5 couches)'],[[7,'Application','Données','Services aux applications','HTTP, DNS, SMTP','Application'],[6,'Présentation','Données','Format, chiffrement, compression','TLS, JPEG','Application'],[5,'Session','Données','Ouverture/maintien de dialogues','NetBIOS, RPC','Application'],[4,'Transport','Segment / Datagramme','Ports, fiabilité, contrôle de flux','TCP, UDP','Transport'],[3,'Réseau','Paquet','Adressage logique, routage','IP, ICMP','Internet'],[2,'Liaison','Trame','Adressage MAC, accès au support','Ethernet, ARP*','Accès réseau (liaison)'],[1,'Physique','Bits','Signaux, câbles, connecteurs','RJ-45, fibre','Accès réseau (physique)']])+`<p>En TCP/IP à 4 couches : Application (OSI 5-7), Transport, Internet, Accès réseau (OSI 1-2). <small>*ARP est souvent placé entre couches 2 et 3.</small></p>`+tb(['','TCP','UDP'],[['Connexion','Oui (3-way handshake)','Non'],['Fiabilité','Accusés, retransmission','Aucune'],['Usage','Web, mail, SSH','DNS, voix, vidéo, DHCP']])+tb(['','Adresse MAC','Adresse IP'],[['Couche','2','3'],['Longueur','48 bits (hexa)','32 bits (IPv4) / 128 bits (IPv6)'],['Portée','Segment local, change à chaque saut','Bout en bout (sauf NAT)'],['Équipement','Switch','Routeur']])+`<p><b>Switch</b> : transmet selon la MAC destination (couche 2). <b>Routeur</b> : transmet selon l’IP destination entre réseaux (couche 3).</p><h3>Animation : encapsulation</h3><div id="anim"></div>`],
+['Protocoles et suites',['Décrire la fonction des protocoles courants','Connaître les ports'],
+`<p>Un protocole est un ensemble de règles (format des messages, ordre, erreurs). Une suite de protocoles (TCP/IP) regroupe des protocoles qui coopèrent à chaque couche.</p>`+tb(['Protocole','Couche','Fonction','Port'],[['HTTP','7','Pages web en clair','TCP 80'],['HTTPS','7','HTTP chiffré par TLS','TCP 443'],['DNS','7','Nom → adresse IP','UDP/TCP 53'],['DHCP','7','Attribution automatique d’adresses','UDP 67 (serveur) / 68 (client)'],['SSH','7','Accès distant sécurisé','TCP 22'],['FTP','7','Transfert de fichiers','TCP 21 (contrôle)'],['SMTP','7','Envoi de courriel','TCP 25 (587 soumission)'],['POP3','7','Récupération de courriel (télécharge)','TCP 110'],['IMAP','7','Courriel synchronisé sur serveur','TCP 143'],['TCP / UDP','4','Transport fiable / rapide','—'],['IPv4 / IPv6','3','Adressage et acheminement','—'],['ICMP','3','Diagnostic et erreurs (ping)','— (protocole IP 1)'],['ARP','2/3','IPv4 → MAC locale','—'],['Ethernet','2','Trames sur LAN filaire','—']])],
+['Organismes de normalisation',['Distinguer ISO, IEEE, IETF, IAB, ISOC, ITU, IANA, ICANN'],
+tb(['Organisme','Rôle'],[['ISO','Normes internationales (modèle OSI)'],['IEEE','Normes LAN : 802.3 Ethernet, 802.11 Wi-Fi'],['IETF','Développe les standards Internet (RFC)'],['IAB','Supervise l’architecture d’Internet, dirige l’IETF'],['ISOC','Association promouvant un Internet ouvert, abrite IETF/IAB'],['ITU / UIT','Agence de l’ONU : télécoms, spectre radio'],['IANA','Gère adresses IP racines, ports, paramètres de protocoles'],['ICANN','Coordonne noms de domaine et supervise l’IANA']])+`<p class="note">Retenir : l’IEEE normalise les technologies physiques/liaison, l’IETF les protocoles Internet (RFC), l’ICANN/IANA la ressource (noms, numéros).</p>`],
+['Encapsulation et désencapsulation',['Décrire l’ajout d’en-têtes à l’émission','Décrire leur retrait à la réception'],
+`<p>À l’émission, chaque couche ajoute son en-tête : données → <b>segment</b> (ports) → <b>paquet</b> (IP source/destination) → <b>trame</b> (MAC source/destination + FCS) → <b>bits</b>. À la réception, chaque couche lit puis retire son en-tête (désencapsulation) et remonte les données.</p><p>Lors d’un passage par un routeur, la trame est désencapsulée jusqu’au paquet, puis ré-encapsulée dans une nouvelle trame : les MAC changent à chaque saut, les IP restent identiques. Voir l’animation du module 2.</p>`],
+['Adressage IPv4 et sous-réseaux',['Convertir binaire/décimal','Calculer réseau, broadcast, plage','Découper en sous-réseaux'],
+`<p>Une adresse IPv4 fait 32 bits (4 octets). Le masque (ou préfixe /n) sépare la partie réseau de la partie hôte.</p>`+tb(['Préfixe','Masque','Hôtes utilisables'],[['/24','255.255.255.0','254'],['/25','255.255.255.128','126'],['/26','255.255.255.192','62'],['/27','255.255.255.224','30'],['/30','255.255.255.252','2']])+`<h3>Exemple corrigé</h3><p>Adresse 192.168.10.77/26. Taille de bloc = 256 − 192 = 64. Blocs : 0, 64, 128, 192. 77 est dans le bloc 64 : réseau <b>192.168.10.64</b>, broadcast <b>192.168.10.127</b>, hôtes .65 à .126 (62 hôtes).</p><p>Hôtes utilisables = 2<sup>h</sup> − 2 (h = bits hôtes). Plages privées (RFC 1918) : 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16. Types : unicast, broadcast, multicast (224.0.0.0/4).</p>`],
+['Adressage IPv6',['Lire et abréger une adresse IPv6','Identifier les types d’adresses'],
+`<p>IPv6 : 128 bits, 8 groupes de 16 bits en hexadécimal. Règles d’abréviation : supprimer les zéros de tête de chaque groupe, et remplacer <i>une seule fois</i> une suite de groupes nuls par « :: ».</p>`+code(`2001:0db8:0000:0000:0000:0000:0000:0001\n→ 2001:db8::1`)+tb(['Type','Préfixe','Usage'],[['Global unicast','2000::/3','Routable sur Internet'],['Link-local','fe80::/10','Lien local, obligatoire sur chaque interface'],['Unique local','fc00::/7','Privé interne'],['Multicast','ff00::/8','Un-à-plusieurs (remplace le broadcast)'],['Loopback','::1/128','Hôte local']])+`<p>Un /64 est la taille standard d’un sous-réseau LAN. L’adresse 2001:db8::/32 est réservée à la documentation.</p>`],
+['Supports et Ethernet',['Comparer cuivre, fibre, sans fil','Décrire la trame Ethernet'],
+tb(['Support','Portée typique','Remarque'],[['UTP cat 5e/6','100 m','Sensible aux interférences'],['Fibre multimode','quelques centaines de m','LED/laser, courte distance'],['Fibre monomode','dizaines de km','Laser, longue distance'],['Wi-Fi 802.11','dizaines de m','Média partagé']])+`<p>Trame Ethernet : préambule, MAC destination (6 octets), MAC source (6), type (2), données (46–1500 octets, MTU 1500), FCS (4). Une MAC se lit en hexadécimal, ex. 00:1A:2B:3C:4D:5E ; les 24 premiers bits identifient le fabricant (OUI).</p>`],
+['Commutation et VLAN',['Comprendre l’apprentissage MAC','Configurer VLAN et trunk'],
+`<p>Un switch apprend l’adresse MAC <i>source</i> de chaque trame et la associe au port d’entrée (table MAC). Si la destination est inconnue ou broadcast, il inonde tous les ports du VLAN sauf celui d’entrée.</p><p>Un <b>VLAN</b> segmente un switch en domaines de diffusion distincts. Un port <b>access</b> appartient à un VLAN ; un port <b>trunk</b> (802.1Q) transporte plusieurs VLAN grâce à une balise. Pour communiquer entre VLAN, il faut un routage (routeur ou switch L3). Le VLAN natif (par défaut 1) circule sans balise.</p><p>Voir les commandes dans le laboratoire IOS.</p>`],
+['Routage',['Lire une table de routage','Écrire une route statique'],
+`<p>Un routeur choisit la route au <b>préfixe le plus long</b> correspondant à l’IP destination. Si aucune route ne correspond et qu’il n’y a pas de route par défaut, le paquet est abandonné.</p>`+tb(['Code','Origine'],[['C','Réseau directement connecté'],['L','Adresse locale de l’interface'],['S','Route statique'],['S*','Route statique par défaut (0.0.0.0/0)']])+code(`ip route 192.168.20.0 255.255.255.0 10.0.0.2\nip route 0.0.0.0 0.0.0.0 10.0.0.2`)+`<p>La passerelle par défaut d’un hôte est l’adresse du routeur sur son propre réseau.</p>`],
+['Configuration Cisco IOS',['Connaître les modes IOS','Sécuriser un équipement de base'],
+tb(['Mode','Invite','Accès'],[['Utilisateur','Router>','Au démarrage'],['Privilégié','Router#','enable'],['Configuration globale','Router(config)#','configure terminal'],['Interface','Router(config-if)#','interface …'],['Ligne','Router(config-line)#','line console 0']])+`<p>Les noms d’interfaces et certaines commandes varient selon les équipements et versions IOS. Utilisez le laboratoire pour les détails de chaque commande. Toujours sauvegarder : <code>copy running-config startup-config</code>.</p>`],
+['Services réseau',['Expliquer DNS, DHCP, NAT'],
+`<p><b>DHCP</b> suit le processus DORA : Discover, Offer, Request, Acknowledge. <b>DNS</b> résout un nom (www.exemple.fr) en IP via des serveurs récursifs et autoritaires. <b>NAT</b> traduit des adresses privées en adresse publique ; PAT (surcharge) utilise les ports pour partager une seule IP publique. <b>NTP</b> synchronise l’heure, <b>Syslog</b> centralise les journaux.</p>`],
+['Sécurité réseau',['Appliquer les bonnes pratiques de base'],
+`<p>Principes : moindre privilège, défense en profondeur, mises à jour. Sur un équipement Cisco : <code>enable secret</code> (haché) plutôt que <code>enable password</code>, SSH plutôt que Telnet, désactivation des ports inutilisés, mots de passe forts, bannière d’avertissement, journalisation. Menaces courantes : hameçonnage, déni de service, usurpation ARP, malwares. Un pare-feu filtre le trafic selon des règles ; une ACL filtre par adresses et ports sur un routeur.</p>`],
+['Dépannage réseau',['Appliquer une méthode ascendante'],
+`<p>Méthode ascendante : vérifier couche 1 (câble, voyant), puis 2 (état interface, VLAN), 3 (IP, masque, passerelle), puis 4-7. Outils : <code>ping</code> (ICMP), <code>traceroute</code> (chemin), <code>show ip interface brief</code>, <code>show ip route</code>, <code>ipconfig /all</code>, <code>nslookup</code>.</p>`+tb(['Symptôme','Cause probable'],[['Interface « administratively down »','shutdown configuré'],['Ping vers la passerelle OK, Internet KO','Route par défaut ou DNS'],['IP 169.254.x.x','DHCP injoignable (APIPA)'],['Ping par IP OK, par nom KO','Problème DNS']])]
+];
+/* ====== COMMANDES ====== */
+const C=[
+['enable','Utilisateur','Passe en mode privilégié','Router> enable','Oublier le mot de passe configuré'],
+['configure terminal','Privilégié','Entre en configuration globale','Router# configure terminal','Taper hors mode privilégié : commande refusée'],
+['hostname R1','Config globale','Nomme l’équipement','Router(config)# hostname R1','Espaces dans le nom'],
+['enable secret Cisco123','Config globale','Mot de passe privilégié haché','Router(config)# enable secret Cisco123','Confondre avec enable password (réversible)'],
+['service password-encryption','Config globale','Chiffre légèrement les mots de passe','Router(config)# service password-encryption','Croire que c’est un chiffrement fort'],
+['no ip domain-lookup','Config globale','Évite la résolution DNS des fautes de frappe','Router(config)# no ip domain-lookup','—'],
+['interface gigabitEthernet 0/0','Config globale','Sélectionne une interface','R1(config)# interface g0/0','Numérotation inexistante sur le matériel'],
+['ip address 192.168.1.1 255.255.255.0','Interface','Affecte IPv4/masque','R1(config-if)# ip address 192.168.1.1 255.255.255.0','Masque inversé ou erroné'],
+['ipv6 address 2001:db8:acad:1::1/64','Interface','Affecte IPv6/préfixe','R1(config-if)# ipv6 address 2001:db8:acad:1::1/64','Oublier le /64'],
+['no shutdown','Interface','Active l’interface','R1(config-if)# no shutdown','Interface restée administratively down'],
+['show ip interface brief','Privilégié','Résume IP et état des interfaces','R1# show ip interface brief','Lire « up/down » : couche 1 up, couche 2 down'],
+['show running-config','Privilégié','Affiche la configuration active (RAM)','R1# show running-config','Penser qu’elle est sauvegardée'],
+['copy running-config startup-config','Privilégié','Sauvegarde en NVRAM (= write memory)','R1# copy running-config startup-config','Oublier : config perdue au redémarrage'],
+['vlan 10','Config globale','Crée un VLAN','S1(config)# vlan 10','Switch sans VLAN assigné au port'],
+['switchport mode access','Interface (switch)','Port en mode access','S1(config-if)# switchport mode access','Oublier switchport access vlan'],
+['switchport mode trunk','Interface (switch)','Port en trunk 802.1Q','S1(config-if)# switchport mode trunk','VLAN non autorisé sur le trunk'],
+['show vlan brief','Privilégié','Liste les VLAN et leurs ports','S1# show vlan brief','Ports trunk non listés'],
+['show mac address-table','Privilégié','Table MAC du switch','S1# show mac address-table','—'],
+['ip route 192.168.20.0 255.255.255.0 10.0.0.2','Config globale','Route statique','R1(config)# ip route 192.168.20.0 255.255.255.0 10.0.0.2','Next-hop non joignable'],
+['show ip route','Privilégié','Affiche la table de routage','R1# show ip route','Confondre C et L'],
+['ping 192.168.1.10','Privilégié','Teste la joignabilité (ICMP)','R1# ping 192.168.1.10','Pare-feu qui bloque ICMP'],
+['show cdp neighbors','Privilégié','Voisins directs (Cisco)','R1# show cdp neighbors','CDP désactivé; utiliser show lldp neighbors'],
+['crypto key generate rsa','Config globale','Génère les clés SSH','R1(config)# crypto key generate rsa','Nom de domaine (ip domain-name) manquant']
+];
+/* ====== GLOSSAIRE ====== */
+const G=[['OSI','Modèle de référence à 7 couches (ISO).','Couche 3 = Réseau',2],['TCP/IP','Suite de protocoles d’Internet.','HTTP sur TCP sur IP',2],['LAN','Réseau local limité géographiquement.','Réseau d’un bureau',1],['WAN','Réseau étendu entre sites distants.','Lien opérateur',1],['MAC','Adresse physique de 48 bits d’une carte réseau.','00:1A:2B:3C:4D:5E',2],['IPv4','Adresse logique sur 32 bits.','192.168.1.10',6],['IPv6','Adresse logique sur 128 bits.','2001:db8::1',7],['DNS','Traduit les noms en adresses IP.','exemple.fr → 93.184.216.34',12],['DHCP','Attribue automatiquement la configuration IP.','Box domestique',12],['TCP','Transport fiable orienté connexion.','Web, SSH',2],['UDP','Transport rapide sans connexion.','Voix, DNS',2],['ICMP','Messages de contrôle/diagnostic IP.','ping',14],['ARP','Résout IPv4 → MAC sur le LAN.','Qui a 192.168.1.1 ?',2],['VLAN','LAN virtuel isolant des domaines de diffusion.','VLAN 10 Compta',9],['Trunk','Lien transportant plusieurs VLAN.','Switch ↔ switch',9],['Passerelle','Routeur de sortie du réseau local.','192.168.1.1',10],['Masque','Sépare partie réseau et hôte.','255.255.255.0',6],['Préfixe','Longueur du masque en bits.','/24, /64',6],['PDU','Unité de données d’une couche.','Segment, paquet, trame',2],['Encapsulation','Ajout d’en-têtes à l’émission.','Paquet → trame',5],['MTU','Taille maximale d’une charge utile.','1500 octets Ethernet',8],['Broadcast','Envoi à tous les hôtes du réseau.','192.168.1.255',6],['Latence','Délai de transmission.','20 ms',1],['Bande passante','Capacité maximale d’un lien.','1 Gbit/s',1]];
+/* ====== QCM : [module, notion, difficulté 1-3, question, choix, bonne, explication] ====== */
+const Q=[
+[1,'LAN/WAN',1,'Quel réseau couvre un seul bâtiment ?',['WAN','LAN','Internet','MAN opérateur'],1,'Un LAN est local ; un WAN relie des sites distants.'],
+[1,'Performances',2,'Un lien de 1 Gbit/s transfère réellement 700 Mbit/s. 700 Mbit/s est…',['La bande passante','Le débit','La latence','Le MTU'],1,'Le débit est la quantité réellement transférée ; la bande passante est la capacité maximale.'],
+[2,'Couches OSI',1,'Quelle couche OSI gère le routage et l’adressage IP ?',['Liaison','Transport','Réseau','Session'],2,'Couche 3 (Réseau) : adressage logique et routage.'],
+[2,'Couches OSI',1,'Combien de couches compte le modèle OSI ?',['4','5','6','7'],3,'Sept : Physique, Liaison, Réseau, Transport, Session, Présentation, Application.'],
+[2,'Rôles des couches',2,'Qui chiffre/compresse les données dans OSI ?',['Session','Présentation','Transport','Liaison'],1,'La couche 6 (Présentation) gère format, chiffrement et compression.'],
+[2,'PDU',1,'Quel est le PDU de la couche 2 ?',['Paquet','Segment','Trame','Bits'],2,'Couche 2 → trame ; couche 3 → paquet ; couche 4 → segment.'],
+[2,'PDU',2,'Un segment TCP contient notamment :',['Adresses MAC','Ports source et destination','Masque','VLAN ID'],1,'La couche transport utilise des ports pour identifier les applications.'],
+[2,'Adresses',2,'Quand un paquet traverse un routeur, que devient-il ?',['IP et MAC conservées','IP changée, MAC conservée','IP conservée, MAC changées','Tout est changé'],2,'Les MAC changent à chaque saut ; les IP restent (sans NAT).'],
+[2,'TCP/UDP',1,'Quel protocole de transport est sans connexion ?',['TCP','UDP','ICMP','SSH'],1,'UDP n’établit pas de connexion et n’a pas de retransmission.'],
+[2,'Correspondance',2,'Dans TCP/IP à 4 couches, où se situent OSI 5, 6 et 7 ?',['Internet','Transport','Application','Accès réseau'],2,'Les trois couches hautes OSI forment la couche Application TCP/IP.'],
+[2,'Équipements',1,'Un switch décide selon :',['L’IP destination','La MAC destination','Le port TCP','Le DNS'],1,'Un switch de couche 2 se base sur la MAC destination.'],
+[2,'Encapsulation',2,'L’ordre correct de l’encapsulation est :',['Trame, paquet, segment','Segment, paquet, trame, bits','Paquet, segment, trame','Bits, trame, segment'],1,'Données → segment → paquet → trame → bits.'],
+[2,'Encapsulation',3,'À la réception, la couche 2 fait quoi avant de remonter ?',['Ajoute un en-tête IP','Vérifie le FCS et retire l’en-tête/fin de trame','Établit une session TCP','Résout le DNS'],1,'Désencapsulation : contrôle FCS, retrait de l’en-tête et de la fin de trame.'],
+[3,'Ports',1,'Port par défaut de HTTPS ?',['80','443','22','53'],1,'HTTPS = TCP 443.'],
+[3,'Ports',2,'Quel protocole utilise UDP 67/68 ?',['DNS','DHCP','SMTP','SSH'],1,'DHCP : serveur 67, client 68.'],
+[3,'Protocoles',2,'Quel protocole permet un accès distant chiffré ?',['Telnet','FTP','SSH','HTTP'],2,'SSH (TCP 22) chiffre la session ; Telnet est en clair.'],
+[3,'Protocoles',2,'Quel protocole de courriel conserve les messages sur le serveur et synchronise ?',['POP3','IMAP','SMTP','FTP'],1,'IMAP synchronise ; POP3 télécharge ; SMTP envoie.'],
+[4,'Organismes',1,'Qui normalise Ethernet (802.3) et le Wi-Fi (802.11) ?',['IETF','IEEE','ICANN','ISO'],1,'L’IEEE normalise les technologies LAN.'],
+[4,'Organismes',2,'Qui publie les RFC ?',['IETF','ITU','IANA','ISOC seule'],0,'L’IETF développe les standards Internet publiés en RFC.'],
+[4,'Organismes',2,'Qui coordonne les noms de domaine ?',['IEEE','ICANN','ITU','ISO'],1,'ICANN coordonne noms et supervise l’IANA.'],
+[5,'Encapsulation',2,'Quel en-tête contient les adresses IP ?',['Segment','Paquet','Trame','Bit'],1,'Le paquet (couche 3) porte les IP source/destination.'],
+[6,'Adressage',2,'Adresse réseau de 192.168.10.77/26 ?',['192.168.10.0','192.168.10.64','192.168.10.76','192.168.10.128'],1,'Blocs de 64 : 0, 64, 128… 77 est dans le bloc 64.'],
+[6,'Adressage',2,'Hôtes utilisables dans un /27 ?',['32','30','28','62'],1,'2^5 − 2 = 30.'],
+[6,'Adressage',1,'Quelle adresse est privée ?',['172.32.0.1','172.20.5.9','11.0.0.1','192.169.1.1'],1,'172.16.0.0/12 couvre 172.16–172.31.'],
+[6,'Adressage',3,'Broadcast de 10.1.1.130/25 ?',['10.1.1.255','10.1.1.127','10.1.1.131','10.1.1.254'],0,'/25 : blocs 0–127 et 128–255 ; 130 est dans le second, broadcast .255.'],
+[7,'IPv6',2,'Forme abrégée de 2001:0db8:0000:0000:0000:0000:0000:0001 ?',['2001:db8::1','2001:db8:1','2001::db8::1','2001:db8:0:1'],0,'Zéros de tête supprimés, « :: » une seule fois.'],
+[7,'IPv6',1,'Un préfixe fe80::/10 désigne :',['Global unicast','Link-local','Multicast','Loopback'],1,'fe80::/10 = link-local.'],
+[8,'Ethernet',2,'MTU Ethernet standard ?',['1500 octets','576 octets','9000 bits','64 octets'],0,'1500 octets de charge utile.'],
+[8,'Supports',2,'Support adapté à plusieurs dizaines de km ?',['UTP cat6','Fibre monomode','Wi-Fi','Coaxial'],1,'La fibre monomode couvre les très longues distances.'],
+[9,'VLAN',2,'Un port connecté à un PC du VLAN 10 doit être :',['trunk','access VLAN 10','routé','shutdown'],1,'switchport mode access + switchport access vlan 10.'],
+[9,'VLAN',2,'Pourquoi deux VLAN ne communiquent-ils pas par défaut ?',['Ils partagent le même broadcast','Ce sont des domaines de diffusion séparés','Ils ont la même MAC','Le trunk les bloque toujours'],1,'Il faut du routage inter-VLAN.'],
+[9,'Commutation',2,'Que fait un switch avec une trame dont la MAC destination est inconnue ?',['La supprime','L’inonde sur les autres ports du VLAN','La renvoie à l’expéditeur','La route'],1,'Inondation (flooding) sauf sur le port d’entrée.'],
+[10,'Routage',2,'Quelle route est choisie ?',['La plus courte distance en sauts','Le préfixe le plus long','La plus ancienne','La première de la table'],1,'Correspondance au préfixe le plus long.'],
+[10,'Routage',2,'Commande de route par défaut :',['ip route 0.0.0.0 0.0.0.0 10.0.0.2','ip default 10.0.0.2','route add default','ip gateway 10.0.0.2'],0,'0.0.0.0/0 avec un next-hop.'],
+[11,'Modes IOS',1,'Quelle invite correspond au mode privilégié ?',['Router>','Router#','Router(config)#','Router(config-if)#'],1,'« # » = privilégié.'],
+[11,'Modes IOS',2,'Pour configurer une interface depuis le mode privilégié, on tape d’abord :',['interface g0/0','configure terminal','enable','line vty 0 4'],1,'configure terminal ouvre la config globale.'],
+[11,'Commandes de base',2,'Quelle commande protège le mode privilégié avec un hachage ?',['enable password','enable secret','login local','banner motd'],1,'enable secret stocke un hash.'],
+[11,'Interfaces',1,'Interface « administratively down » : que faire ?',['ip route','no shutdown','shutdown','reload'],1,'no shutdown dans le mode interface.'],
+[11,'Sauvegarde',1,'Quelle commande sauvegarde la config ?',['copy running-config startup-config','show running-config','erase startup-config','reload'],0,'running-config (RAM) → startup-config (NVRAM).'],
+[11,'Commandes de base',2,'« line vty 0 4 » puis « transport input ssh » fait quoi ?',['Active la console','Autorise uniquement SSH en accès distant','Crée un VLAN','Chiffre les mots de passe'],1,'Limite les lignes distantes à SSH.'],
+[12,'DHCP',2,'Dans DORA, que signifie le « R » ?',['Reply','Request','Route','Release'],1,'Discover, Offer, Request, Acknowledge.'],
+[12,'NAT',3,'Qu’utilise le PAT pour partager une IP publique ?',['Les VLAN','Les ports','Les MAC','Le TTL'],1,'Surcharge par numéros de port.'],
+[13,'Bonnes pratiques',1,'Quel protocole d’administration éviter ?',['SSH','Telnet','HTTPS','TLS'],1,'Telnet transmet tout en clair.'],
+[14,'Dépannage',2,'Un PC a 169.254.4.7. Cause probable ?',['Pas de réponse DHCP','Mauvais DNS','Route manquante','VLAN natif'],0,'APIPA = aucun serveur DHCP joint.'],
+[14,'Dépannage',2,'Ping par IP OK mais pas par nom :',['Problème DNS','Câble coupé','Masque erroné','Trunk KO'],0,'La connectivité IP est correcte ; la résolution de noms échoue.']
+];
+/* ====== ÉTAT ====== */
+let S=JSON.parse(localStorage.getItem('ccna')||'{"done":{},"sc":[],"miss":{},"act":[]}');
+const save=()=>{try{localStorage.setItem('ccna',JSON.stringify(S))}catch(e){}};
+const log=t=>{S.act.unshift(new Date().toLocaleString('fr-FR')+' — '+t);S.act=S.act.slice(0,8);save()};
+function cp(b){const t=b.previousElementSibling.innerText;try{navigator.clipboard.writeText(t)}catch(e){}b.textContent='Copié';setTimeout(()=>b.textContent='Copier',1200)}
+/* ====== NAV ====== */
+function nav(){side.innerHTML=`<h1>Atelier Réseaux</h1><input id="q" placeholder="Rechercher…" aria-label="Recherche" oninput="if(this.value.length>1)location.hash='#/s/'+encodeURIComponent(this.value)"><a href="#/">Tableau de bord</a><small>Cours</small>`+M.map((m,i)=>`<a href="#/c/${i}">${i+1}. ${m[0]}${S.done[i]?' ✓':''}</a>`).join('')+`<small>Pratique</small><a href="#/lab">Laboratoire Cisco IOS</a><a href="#/cmd">Fiches de commandes</a><a href="#/qcm">QCM</a><a href="#/gl">Glossaire</a>`;}
+function route(){nav();const h=location.hash.slice(2).split('/'),r=h[0];side.classList.remove('open');window.scrollTo(0,0);
+({'':home,c:()=>course(+h[1]),lab,cmd,qcm,gl,s:()=>search(decodeURIComponent(h[1]||''))}[r]||home)();
+side.querySelectorAll('a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')===location.hash||(!location.hash&&a.getAttribute('href')==='#/')))}
+addEventListener('hashchange',route);
+/* ====== ACCUEIL ====== */
+function home(){const d=Object.keys(S.done).length,p=Math.round(d/M.length*100),avg=S.sc.length?Math.round(S.sc.reduce((a,b)=>a+b.p,0)/S.sc.length):0,rv={};
+Object.values(S.miss).forEach(x=>rv[x]=(rv[x]||0)+1);
+main.innerHTML=`<h2>Révision des réseaux — CCNA</h2><p>Plateforme pédagogique indépendante, non affiliée à Cisco et non certifiée par Cisco.</p>
+<div class="card"><b>Progression : ${d}/${M.length} cours (${p} %)</b><div class="bar"><i style="width:${p}%"></i></div></div>
+<div class="grid"><div class="card"><b>QCM passés</b><br>${S.sc.length} — moyenne ${avg} %</div><div class="card"><b>Meilleur score</b><br>${S.sc.length?Math.max(...S.sc.map(x=>x.p)):0} %</div><div class="card"><b>Questions ratées</b><br>${Object.keys(S.miss).length}</div></div>
+<div class="grid"><a class="btn" href="#/c/1">Cours OSI/TCP-IP</a><a class="btn" href="#/lab">Laboratoire IOS</a><a class="btn" href="#/qcm">QCM</a><a class="btn" href="#/gl">Glossaire</a></div>
+<h3>Notions à réviser</h3><div class="card">${Object.keys(rv).length?Object.entries(rv).map(e=>`${e[0]} (${e[1]})`).join(', '):'Rien pour l’instant : passez un QCM.'}</div>
+<h3>Dernières activités</h3><div class="card">${S.act.length?S.act.join('<br>'):'Aucune activité.'}</div>
+<button class="btn s" onclick="if(confirm('Réinitialiser toute la progression ?')){S={done:{},sc:[],miss:{},act:[]};save();route()}">Réinitialiser la progression</button>`}
+/* ====== COURS ====== */
+function course(i){const m=M[i];if(!m)return home();main.innerHTML=`<h2>${i+1}. ${m[0]}</h2><div class="card"><b>Objectifs</b><ul>${m[1].map(o=>`<li>${o}</li>`).join('')}</ul></div>${m[2]}
+<h3>Synthèse</h3><div class="note">Relisez les tableaux ci-dessus : ils résument l’essentiel du module.</div>
+<p><button class="btn" onclick="S.done[${i}]=1;log('Cours terminé : ${m[0].replace(/'/g,'’')}');route()">${S.done[i]?'Cours terminé ✓':'Marquer comme terminé'}</button> <a class="btn s" href="#/qcm" onclick="preset=${i+1}">QCM de ce module</a>
+${i<M.length-1?` <a class="btn s" href="#/c/${i+1}">Module suivant</a>`:''}</p>`;if(i==1)anim()}
+/* ====== ANIMATION ====== */
+function anim(){const st=[['Application','Données','L’utilisateur envoie une requête HTTP.'],['Transport','Segment : + ports (ex. 51000 → 80)','TCP ajoute ports, numéros de séquence.'],['Réseau','Paquet : + IP source/destination','IP ajoute les adresses logiques.'],['Liaison','Trame : + MAC + FCS','Ethernet ajoute MAC source/destination et FCS.'],['Physique','Bits','Conversion en signaux sur le support.']];let n=0;
+const el=$('#anim');const draw=()=>{el.innerHTML=`<div class="card">${st.map((s,k)=>`<div class="lay ${k<=n?'on':''}"><b>${s[0]}</b> — ${s[1]}</div>`).join('')}<p>${st[n][2]} <i>(Étape ${n+1}/5 — retour inverse = désencapsulation)</i></p><button class="btn s" id="a1">◀ Précédent</button> <button class="btn" id="a2">Suivant ▶</button> <button class="btn s" id="a3">Réinitialiser</button></div>`;
+$('#a1').onclick=()=>{n=Math.max(0,n-1);draw()};$('#a2').onclick=()=>{n=Math.min(4,n+1);draw()};$('#a3').onclick=()=>{n=0;draw()}};draw()}
+/* ====== COMMANDES ====== */
+function cmd(){main.innerHTML=`<h2>Fiches de commandes Cisco IOS</h2><p class="note">Les noms d’interfaces et certaines commandes varient selon les équipements et les versions IOS.</p>`+C.map(c=>`<div class="card"><b>${c[0]}</b><br>Mode : ${c[1]} · Rôle : ${c[2]}${code(c[3])}<small>Erreur fréquente : ${c[4]}</small></div>`).join('')+`<div class="card"><b>Vérification</b> : <code>show ip interface brief</code>, <code>show running-config</code>, <code>show ip route</code>, <code>ping</code>.</div>`+sim(`R1# show ip interface brief\nInterface        IP-Address     OK? Method Status                Protocol\nGigabitEthernet0/0 192.168.1.1  YES manual up                    up\nGigabitEthernet0/1 unassigned   YES unset  administratively down down`)}
+/* ====== QCM ====== */
+let preset=0,qz=null;
+function qcm(){const nots=[...new Set(Q.map(q=>q[1]))];
+main.innerHTML=`<h2>QCM</h2><div class="card f"><label>Module <select id="qm"><option value="0">Tous</option>${M.map((m,i)=>`<option value="${i+1}">${i+1}. ${m[0]}</option>`).join('')}</select></label>
+<label>Notion <select id="qn"><option value="">Toutes</option>${nots.map(n=>`<option>${n}</option>`).join('')}</select></label>
+<label>Niveau <select id="qd"><option value="0">Tous</option><option value="1">Facile</option><option value="2">Moyen</option><option value="3">Avancé</option></select></label>
+<label>Nombre <select id="qc"><option>5</option><option>10</option><option>15</option></select></label>
+<label>Mode <select id="qo"><option value="t">Entraînement</option><option value="e">Examen</option></select></label>
+<button class="btn" onclick="startQ()">Commencer</button><button class="btn s" onclick="startQ(1)">Questions ratées</button></div><div id="qa"></div>`;if(preset)$('#qm').value=preset;preset=0}
+function startQ(miss){let l=Q.map((q,i)=>[q,i]);const m=+$('#qm').value,n=$('#qn').value,d=+$('#qd').value;
+if(miss)l=l.filter(x=>S.miss[x[1]]);else l=l.filter(x=>(!m||x[0][0]==m)&&(!n||x[0][1]==n)&&(!d||x[0][2]==d));
+l.sort(()=>Math.random()-.5);l=l.slice(0,+$('#qc').value);if(!l.length){$('#qa').innerHTML='<div class="card">Aucune question ne correspond à ces critères.</div>';return}
+qz={l,k:0,a:[],mode:$('#qo').value,lock:0};showQ()}
+function showQ(){const[q]=qz.l[qz.k];$('#qa').innerHTML=`<div class="card"><small>Question ${qz.k+1}/${qz.l.length} · ${M[q[0]-1][0]} · ${q[1]}</small><p><b>${q[3]}</b></p>${q[4].map((o,i)=>`<button class="opt" onclick="pick(${i})" id="o${i}">${'ABCD'[i]}. ${o}</button>`).join('')}<div id="ex"></div></div>`;qz.lock=0}
+function pick(i){if(qz.lock)return;const[q,id]=qz.l[qz.k];qz.a[qz.k]=i;
+if(qz.mode=='t'){qz.lock=1;$('#o'+q[5]).classList.add('ok');if(i!=q[5])$('#o'+i).classList.add('ko');$('#ex').innerHTML=`<div class="note">${i==q[5]?'Correct.':'Incorrect.'} ${q[6]}</div><p><button class="btn" onclick="nextQ()">Suivant</button></p>`}
+else{document.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));$('#o'+i).classList.add('sel');$('#ex').innerHTML=`<p><button class="btn" onclick="nextQ()">Suivant</button></p>`}}
+function nextQ(){if(qz.a[qz.k]===undefined)return;qz.k++;qz.k<qz.l.length?showQ():endQ()}
+function endQ(){let ok=0,rv=new Set,det='';qz.l.forEach(([q,id],k)=>{const g=qz.a[k]==q[5];if(g){ok++;delete S.miss[id]}else{S.miss[id]=q[1];rv.add(q[1])}
+det+=`<div class="card"><b>${g?'✔':'✘'} ${q[3]}</b><br>Votre réponse : ${q[4][qz.a[k]]}<br>Bonne réponse : ${q[4][q[5]]}<br><small>${q[6]}</small></div>`});
+const p=Math.round(ok/qz.l.length*100);S.sc.push({p,t:Date.now()});log(`QCM ${ok}/${qz.l.length} (${p} %)`);
+$('#qa').innerHTML=`<div class="card"><h3>Score : ${ok}/${qz.l.length} (${p} %)</h3><p>Notions à revoir : ${rv.size?[...rv].join(', '):'aucune'}</p></div>${det}`}
+/* ====== GLOSSAIRE ====== */
+function gl(){main.innerHTML=`<h2>Glossaire</h2><p class="f"><input id="gf" placeholder="Filtrer…" oninput="gr()"></p><div id="gx"></div>`;gr()}
+function gr(){const f=($('#gf').value||'').toLowerCase();$('#gx').innerHTML=G.filter(g=>g.join(' ').toLowerCase().includes(f)).map(g=>`<div class="card"><b>${g[0]}</b> — ${g[1]}<br><small>Exemple : ${g[2]} · <a href="#/c/${g[3]-1}">Module ${g[3]}</a></small></div>`).join('')}
+/* ====== RECHERCHE ====== */
+function search(t){const f=t.toLowerCase(),tx=h=>h.replace(/<[^>]+>/g,' ');let o='';
+M.forEach((m,i)=>{if((m[0]+tx(m[2])).toLowerCase().includes(f))o+=`<div class="card">Cours : <a href="#/c/${i}">${m[0]}</a></div>`});
+C.forEach(c=>{if(c.join(' ').toLowerCase().includes(f))o+=`<div class="card">Commande : <a href="#/cmd">${c[0]}</a> — ${c[2]}</div>`});
+G.forEach(g=>{if(g.join(' ').toLowerCase().includes(f))o+=`<div class="card">Glossaire : <a href="#/gl">${g[0]}</a> — ${g[1]}</div>`});
+main.innerHTML=`<h2>Recherche : « ${t.replace(/</g,'&lt;')} »</h2>${o||'<div class="card">Aucun résultat.</div>'}`;const q=$('#q');if(q){q.value=t;q.focus()}}
+/* ====== SIMULATEUR IOS ====== */
+let R;const rst=()=>R={mode:'>',host:'Router',ifs:{'Gi0/0':{ip:'',m:'',up:0},'Gi0/1':{ip:'',m:'',up:0}},cur:'',routes:[],vl:{1:'default'},cv:0,hist:[]};
+const ipv=s=>/^(\d{1,3}\.){3}\d{1,3}$/.test(s)&&s.split('.').every(x=>x<256),ti=s=>s.split('.').reduce((a,b)=>a*256+ +b,0)>>>0;
+const pre=()=>R.host+({'>':'>','#':'#','g':'(config)#','i':'(config-if)#','v':'(config-vlan)#'}[R.mode]);
+function ios(c){const w=c.trim().split(/\s+/).filter(Boolean);if(!w.length)return'';const lw=w.map(x=>x.toLowerCase());
+const is=(...p)=>lw.length>=p.length&&p.every((x,i)=>x.startsWith(lw[i]));const ex=(...p)=>lw.length==p.length&&is(...p);
+const bad='% Commande incorrecte ou incomplète. Tapez ? pour l’aide.';
+if(lw[0]=='?')return R.mode=='>'?'enable  show  ping':R.mode=='#'?'configure  show  ping  copy  disable  write':R.mode=='g'?'hostname  interface  ip route  vlan  enable  exit  end  do':R.mode=='i'?'ip address  no shutdown  shutdown  description  exit':'name  exit';
+if(lw[0]=='do'&&R.mode!='>'){const s=R.mode;R.mode='#';const r=ios(w.slice(1).join(' '));R.mode=s;return r}
+if(ex('end')&&R.mode!='>'&&R.mode!='#'){R.mode='#';return''}
+if(ex('exit')){R.mode={'i':'g','v':'g','g':'#','#':'>'}[R.mode]||R.mode;return''}
+if(R.mode=='>'){if(ex('enable')){R.mode='#';return''}}
+if(R.mode=='#'||R.mode=='>'){
+ if(R.mode=='#'&&ex('disable')){R.mode='>';return''}
+ if(R.mode=='#'&&is('configure','terminal')){R.mode='g';return'Enter configuration commands, one per line. End with CNTL/Z.'}
+ if(is('show','ip','interface','brief')){let o='Interface          IP-Address      OK? Method Status                Protocol\n';for(const k in R.ifs){const f=R.ifs[k];o+=`GigabitEthernet${k.slice(2)}`.padEnd(19)+(f.ip||'unassigned').padEnd(16)+'YES '+(f.ip?'manual':'unset ')+' '+(f.up?'up':'administratively down').padEnd(22)+(f.up?'up':'down')+'\n'}return o}
+ if(is('show','ip','route')){let o='Codes: C - connected, L - local, S - static\n\n';for(const k in R.ifs){const f=R.ifs[k];if(f.ip&&f.up)o+=`C    ${cnet(f)} is directly connected, GigabitEthernet${k.slice(2)}\nL    ${f.ip}/32 is directly connected, GigabitEthernet${k.slice(2)}\n`}R.routes.forEach(r=>o+=`S    ${r[0]}/${r[1]} [1/0] via ${r[2]}\n`);return o}
+ if(is('show','vlan','brief'))return'VLAN Name     Status\n'+Object.entries(R.vl).map(v=>String(v[0]).padEnd(5)+v[1].padEnd(9)+'active').join('\n');
+ if(is('show','running-config'))return`hostname ${R.host}\n`+Object.entries(R.ifs).map(([k,f])=>`!\ninterface GigabitEthernet${k.slice(2)}\n `+(f.ip?`ip address ${f.ip} ${f.m}`:'no ip address')+`\n `+(f.up?'':'shutdown')).join('\n')+R.routes.map(r=>`\nip route ${r.slice(0,3).join(' ')}`).join('');
+ if(is('copy','running-config','startup-config')||ex('write','memory')||ex('write'))return'Destination filename [startup-config]? \nBuilding configuration...\n[OK] (simulé)';
+ if(is('ping')&&lw[1]){if(!ipv(lw[1]))return'% Adresse IP invalide.';const t=ti(lw[1]);const lan=Object.values(R.ifs).some(f=>f.ip&&f.up&&(t&ti(f.m))==(ti(f.ip)&ti(f.m)));const rt=R.routes.some(r=>(t&ti(r[1]))==ti(r[0])&&0)||R.routes.some(r=>(t&ti(r[1]))==(ti(r[0])&ti(r[1])));return lan||rt?'Sending 5, 100-byte ICMP Echos to '+lw[1]+':\n!!!!!\nSuccess rate is 100 percent (5/5) — résultat simulé':'Sending 5, 100-byte ICMP Echos to '+lw[1]+':\n.....\nSuccess rate is 0 percent (0/5) — aucune route/interface up pour ce réseau'}
+ if(R.mode=='>'&&(is('configure')||is('show','running-config')))return'% Accès refusé : passez d’abord en mode privilégié (enable).';
+ return bad}
+if(R.mode=='g'){
+ if(is('hostname')&&w[1]){R.host=w[1];return''}
+ if(is('interface')&&w[1]){const k=(w.slice(1).join('')).toLowerCase().replace('gigabitethernet','gi').replace(/^g(?!i)/,'gi').replace('gi','Gi');if(R.ifs[k]){R.cur=k;R.mode='i';return''}return'% Interface inexistante dans ce simulateur (Gi0/0, Gi0/1).'}
+ if(is('ip','route')&&w.length==5){if(!ipv(w[2])||!ipv(w[3])||!ipv(w[4]))return'% Adresse invalide.';R.routes.push([w[2],w[3],w[4]]);return''}
+ if(is('vlan')&&/^\d+$/.test(w[1]||'')){R.cv=+w[1];if(!R.vl[R.cv])R.vl[R.cv]='VLAN'+String(R.cv).padStart(4,'0');R.mode='v';return''}
+ return bad}
+if(R.mode=='i'){const f=R.ifs[R.cur];
+ if(is('ip','address')){if(w.length<4)return'% Incomplet : ip address <adresse> <masque>';if(!ipv(w[2])||!ipv(w[3]))return'% Adresse ou masque invalide.';f.ip=w[2];f.m=w[3];return''}
+ if(ex('no','shutdown')){f.up=1;return`%LINK-5-CHANGED: Interface GigabitEthernet${R.cur.slice(2)}, changed state to up`}
+ if(ex('shutdown')){f.up=0;return''}
+ if(is('description'))return'';return bad}
+if(R.mode=='v'){if(is('name')&&w[1]){R.vl[R.cv]=w[1];return''}return bad}
+return bad}
+const cnet=f=>{const m=ti(f.m),n=(ti(f.ip)&m)>>>0;let p=0;for(let i=31;i>=0&&(m>>>i&1);i--)p++;return[n>>>24,n>>16&255,n>>8&255,n&255].join('.')+'/'+p};
+function lab(){rst();main.innerHTML=`<h2>Laboratoire Cisco IOS</h2><p class="note">Simulateur pédagogique en JavaScript : ce n’est pas un vrai Cisco IOS. Commandes gérées : enable, disable, configure terminal, hostname, interface g0/0, ip address, no shutdown, shutdown, ip route, vlan, name, exit, end, do, show ip interface brief / ip route / vlan brief / running-config, ping, copy running-config startup-config, ?</p>
+<div id="term" onclick="$('#tin').focus()"></div><p><button class="btn s" onclick="lab()">Réinitialiser</button></p>
+<h3>Scénario guidé</h3>`+code(`enable\nconfigure terminal\nhostname R1\ninterface g0/0\nip address 192.168.1.1 255.255.255.0\nno shutdown\nend\nshow ip interface brief\nshow ip route\nping 192.168.1.1`)+`<p>Les noms d’interfaces et certaines commandes varient selon les équipements et les versions IOS.</p>`;
+const t=$('#term');t.innerHTML=`<span id="out">Simulateur pédagogique — tapez ? pour l’aide.\n</span><span id="pr">${pre()} </span><input id="tin" autocomplete="off" aria-label="Commande IOS">`;
+$('#tin').onkeydown=e=>{const i=e.target;if(e.key=='Enter'){const c=i.value,r=ios(c);i.value='';out(c,r)}
+else if(e.key=='ArrowUp'){R.hist.i=Math.max(0,(R.hist.i??R.hist.length)-1);i.value=R.hist[R.hist.i]||''}}}
+function out(c,r){const o=$('#out');o.textContent=o.textContent.replace(/[^\n]*$/,'')+$('#pr').textContent+c+'\n'+(r?r+'\n':'');if(c)R.hist.push(c),R.hist.i=R.hist.length;$('#pr').textContent=pre()+' ';$('#term').scrollTop=1e5}
+route();
+</script></body></html>
